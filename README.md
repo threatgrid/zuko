@@ -16,7 +16,7 @@ Include a dependency to this library.
 In Leiningen:
 
 ```clojure
-[org.clojars.quoll/zuko "0.0.1"]
+[org.clojars.quoll/zuko "0.1.0-SNAPSHOT"]
 ```
 
 In `deps.edn`:
@@ -24,7 +24,7 @@ In `deps.edn`:
 ```clojure
 {
   :deps {
-    org.clojure/clojure {:mvn/version "1.9.0"}
+    org.clojars.quoll/zuko {:mvn/version "0.1.0-SNAPSHOT"}
   }
 }
 ```
