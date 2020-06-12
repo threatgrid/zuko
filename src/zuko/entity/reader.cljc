@@ -1,7 +1,7 @@
 (ns ^{:doc "Reads structured data from a graph."
       :author "Paula Gearon"}
     zuko.entity.reader
-  (:require [zuko.entity.general :as general :refer [KeyValue EntityMap GraphType]]
+  (:require [zuko.entity.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
             [zuko.entity.graph-api :as api]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]
@@ -34,7 +34,7 @@
   [graph :- GraphType
    prop :- s/Any
    v :- s/Any]
-  (if (and (not (#{:db/ident :db/id} prop)) (api/node-type? graph v))
+  (if (and (not (#{:db/ident :db/id} prop)) (api/node-type? graph prop v))
     (let [data (property-values graph v)]
       data)))
 
@@ -117,13 +117,13 @@
                 (ffirst (api/resolve-pattern graph '[?eid :db/ident ident])))]
     (ref->entity graph eid)))
 
-(s/defn store->entities :- [EntityMap]
+(s/defn graph->entities :- [EntityMap]
   "Pulls all top level entities out of a store"
-  ([graph :- GraphType
-   (store->entities graph nil))
+  ([graph :- GraphType]
+   (graph->entities graph nil))
   ([graph :- GraphType
     exclusions :- (s/maybe #{s/Keyword})]
-   (->> (api/resolve-pattern graph '[?e :tg/entity true]])
+   (->> (api/resolve-pattern graph '[?e :tg/entity true])
         (map first)
         (map #(ref->entity graph % exclusions)))))
 
@@ -142,9 +142,9 @@
      ([data indent] (.stringify js/JSON (clj->js data) nil indent))))
 
 
-(s/defn store->str :- s/Str
+(s/defn graph->str :- s/Str
   "Reads a store into JSON strings"
   ([graph :- GraphType]
-   (json-generate-string (store->entities graph)))
+   (json-generate-string (graph->entities graph)))
   ([graph :- GraphType, indent :- s/Num]
-   (json-generate-string (store->entities graph) indent)))
+   (json-generate-string (graph->entities graph) indent)))

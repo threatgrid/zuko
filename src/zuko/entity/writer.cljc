@@ -1,7 +1,7 @@
 (ns ^{:doc "Converts external data into a graph format (triples)."
       :author "Paula Gearon"}
     zuko.entity.writer
-  (:require [zuko.entity.general :as general :refer [tg-ns KeyValue EntityMap ResolverFn]]
+  (:require [zuko.entity.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
             [zuko.entity.reader :as reader]
             [zuko.entity.graph-api :as api]
             [schema.core :as s :refer [=>]]
@@ -100,7 +100,7 @@
 (s/defn map->triples :- EntityTriplesPair
   "Converts a single map to triples. Returns a pair of the map's ID and the triples for the map."
   [data :- {s/Keyword s/Any}]
-  (let [entity-ref (or (:db/id data) (api/new-node *current-storage*))
+  (let [entity-ref (or (:db/id data) (api/new-node *current-graph*))
         triples-data (doall (mapcat (partial property-vals entity-ref)
                                     data))]
     [entity-ref triples-data]))
@@ -111,12 +111,13 @@
   [id :- s/Any]
   (if (keyword? id)
     id
-    (api/node-label *current-storage* id)))
+    (api/node-label *current-graph* id)))
 
 
 (s/defn ident-map->triples :- [Triple]
   "Converts a single map to triples for an ID'ed map"
-  ([graph j]
+  ([graph :- GraphType
+    j :- EntityMap]
    (binding [*current-graph* graph]
      (ident-map->triples j)))
   ([j :- EntityMap]
@@ -128,7 +129,8 @@
 
 (s/defn entities->triples :- [Triple]
   "Converts objects into a sequence of triples."
-  [graph entities]
+  [graph :- GraphType
+   entities :- [EntityMap]]
   (binding [*current-graph* graph]
     (doall (mapcat ident-map->triples entities))))
 
@@ -148,8 +150,9 @@
 
 (s/defn string->triples :- [Triple]
   "Converts a string to triples"
-  [s :- s/Str]
-  (entities->triples (parse-json-string s)))
+  [graph :- GraphType
+   s :- s/Str]
+  (entities->triples graph (parse-json-string s)))
 
 
 ;; updating the store
