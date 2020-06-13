@@ -2,8 +2,8 @@
   (:require [zuko.entity.writer :refer [string->triples entities->triples entity-update->triples ident-map->triples]]
             [zuko.entity.reader :refer [graph->entities ref->entity]]
             [zuko.helper-stub :as test-helper]
-            [asami.core :refer [empty-graph assert-data retract-data q]]
             [asami.multi-graph]
+            [asami.core :refer [empty-graph assert-data retract-data q]]
             #?(:clj  [schema.test :as st :refer [deftest]]
                :cljs [schema.test :as st :refer-macros [deftest]])
             #?(:clj  [clojure.test :as t :refer [is]]
@@ -125,7 +125,7 @@
 
 (defn round-trip
   [data]
-  (let [m (entities->triples test-helper/empty-graph data)
+  (let [m (entities->triples empty-graph (seq data))
         new-db (assert-data empty-graph m)]
     (set (graph->entities new-db))))
 
@@ -164,7 +164,7 @@
 
 (defn generate-diff
   [o1 o2]
-  (let [triples (entities->triples test-helper/empty-graph [o1])
+  (let [triples (entities->triples empty-graph [o1])
         props (filter (fn [[k v]] (or (number? v) (string? v))) o1)
         gr (assert-data empty-graph triples)
         id (ffirst (q (concat '[:find ?id :where] (map (fn [[k v]] ['?id k v]) props)) gr))
@@ -172,7 +172,8 @@
     [id additions retractions]))
 
 (deftest test-updates
-  (let [[id1 add1 ret1] (generate-diff {:a 1} {:a 2})
+  (let [
+        [id1 add1 ret1] (generate-diff {:a 1} {:a 2})
         [id2 add2 ret2] (generate-diff {:a 1 :b "foo"} {:a 2 :b "foo"})
         [id3 add3 ret3] (generate-diff {:a 1 :b "foo"} {:a 1 :b "bar"})
         [id4 add4 ret4] (generate-diff {:a 1 :b "foo" :c [10 11 12] :d {:x "a" :y "b"} :e [{:m 1} {:m 2}]}
@@ -196,9 +197,9 @@
   (ffirst (q [:find '?n :where ['?n :id id]] graph)))
 
 
-#_(deftest test-ref->entity
+(deftest test-ref->entity
   (let [data {:id "1234" :prop "value" :attribute 2}
-        m (entities->triples test-helper/empty-graph [data])
+        m (entities->triples empty-graph [data])
         graph' (assert-data empty-graph m)
         ref (get-node-ref graph' "1234")
         graph (assert-data graph' [[ref "Connected_To" ref]])
@@ -207,5 +208,45 @@
     (is (= data obj1))
     (is (= data obj2))))
 
+(deftest test-multi-update
+  (let [graph
+        #asami.multi_graph.MultiGraph{:spo #:mem{:node-27367
+                                                 {:db/ident #:mem{:node-27367 {:count 1}},
+                                                  :naga/entity {true {:count 1}},
+                                                  :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" {:count 1}},
+                                                  :type {"sha256" {:count 1}},
+                                                  :id {"4f390192" {:count 1}}}},
+                                      :pos {:db/ident
+                                            #:mem{:node-27367 #:mem{:node-27367 {:count 1}}},
+                                            :naga/entity {true #:mem{:node-27367 {:count 1}}},
+                                            :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" #:mem{:node-27367 {:count 1}}},
+                                            :type {"sha256" #:mem{:node-27367 {:count 1}}},
+                                            :id {"4f390192" #:mem{:node-27367 {:count 1}}}},
+                                      :osp {:mem/node-27367 #:mem{:node-27367 #:db{:ident {:count 1}}},
+                                            true #:mem{:node-27367 #:naga{:entity {:count 1}}},
+                                            "01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9"
+                                            #:mem{:node-27367 {:value {:count 1}}},
+                                            "sha256" #:mem{:node-27367 {:type {:count 1}}},
+                                            "4f390192" #:mem{:node-27367 {:id {:count 1}}}}}
+        id "verdict:AMP File Reputation:4f390192"
+        m {:type "verdict",
+           :disposition 2,
+           :observable {:value "01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9",
+                        :type "sha256"},
+           :disposition_name "Malicious",
+           :valid_time {:start_time (ZonedDateTime/parse "2017-12-05T12:45:32.192Z"),
+                        :end_time (ZonedDateTime/parse "2525-01-01T00:00Z")},
+           :module-name "AMP File Reputation",
+           :id "verdict:AMP File Reputation:4f390192"}
+        new-graph (if-let [n (get-node-ref graph id)]
+                    (let [[assertions retractions] (entity-update->triples graph n m)
+                          assert-keys (set (map (fn [[a b c]] [a b]) assertions))
+                          retract-existing (filter (fn [[a b c]] (assert-keys [a b])) retractions)]
+                      (-> graph
+                          (retract-data retract-existing)
+                          (assert-data assertions)))
+                    (let [assertions (ident-map->triples graph (assoc m :id id))]
+                      (assert-data graph assertions)))]
+    (is (= 4 (count (:spo new-graph))))))
 
 #?(:cljs (t/run-tests))
