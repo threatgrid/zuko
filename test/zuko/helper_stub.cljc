@@ -1,12 +1,12 @@
 (ns zuko.helper-stub
-  (:require [zuko.entity.graph-api :as api]
+  (:require [zuko.node :as node]
             #?(:clj  [schema.core :as s]
                :cljs [schema.core :as s :include-macros true])))
 
 (declare ->TestGraph)
 
 (s/defrecord TestGraph [data n]
-  api/SimpleGraphAPI
+  node/NodeAPI
   (data-attribute [store data] :tg/first)
   (container-attribute [store data] :tg/contains)
   (new-node [store]

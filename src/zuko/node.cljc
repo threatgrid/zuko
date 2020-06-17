@@ -1,10 +1,10 @@
-(ns ^{:doc "Describes simple functions for connecting to a graph"
+(ns ^{:doc "Describes simple functions for describing nodes in a graph"
       :author "Paula Gearon"}
-  zuko.entity.graph-api)
+  zuko.node)
 
 (def tg-ns "tg")
 
-(defprotocol SimpleGraphAPI
+(defprotocol NodeAPI
   (data-attribute [graph data] "Returns a keyword used for an attribute refering to the data")
   (container-attribute [graph data] "Returns a keyword used for an attribute that contains the data")
   (new-node [graph] "A function that returns a new node object for the graph")

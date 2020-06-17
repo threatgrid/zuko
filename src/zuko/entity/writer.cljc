@@ -3,7 +3,7 @@
     zuko.entity.writer
   (:require [zuko.entity.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
             [zuko.entity.reader :as reader]
-            [zuko.entity.graph-api :as api]
+            [zuko.node :as node]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]
             #?(:clj [clojure.java.io :as io])
@@ -53,7 +53,7 @@
                         (recur (conj nl f) r))))]
     (doall  ;; uses a dynamically bound value, so ensure that this is executed
       (map
-       (fn [n] [node (api/container-attribute *current-graph* n) n])
+       (fn [n] [node (node/container-attribute *current-graph* n) n])
        node-list))))
 
 (declare value-triples map->triples)
@@ -62,10 +62,10 @@
   "Creates the triples for a list"
   [[v & vs :as vlist]]
   (if (seq vlist)
-    (let [node-ref (api/new-node *current-graph*)
+    (let [node-ref (node/new-node *current-graph*)
           [value-ref triples] (value-triples v)
           [next-ref next-triples] (list-triples vs)]
-      [node-ref (concat [[node-ref (api/data-attribute *current-graph* value-ref) value-ref]]
+      [node-ref (concat [[node-ref (node/data-attribute *current-graph* value-ref) value-ref]]
                   (when next-ref [[node-ref :tg/rest next-ref]])
                   triples
                   next-triples)])))
@@ -100,7 +100,7 @@
 (s/defn map->triples :- EntityTriplesPair
   "Converts a single map to triples. Returns a pair of the map's ID and the triples for the map."
   [data :- {s/Keyword s/Any}]
-  (let [entity-ref (or (:db/id data) (api/new-node *current-graph*))
+  (let [entity-ref (or (:db/id data) (node/new-node *current-graph*))
         triples-data (doall (mapcat (partial property-vals entity-ref)
                                     data))]
     [entity-ref triples-data]))
@@ -111,7 +111,7 @@
   [id :- s/Any]
   (if (keyword? id)
     id
-    (api/node-label *current-graph* id)))
+    (node/node-label *current-graph* id)))
 
 
 (s/defn ident-map->triples :- [Triple]

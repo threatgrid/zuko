@@ -3,7 +3,7 @@
     zuko.entity.general
   (:require [schema.core :as s :refer [=>]]
             [clojure.string :as string]
-            [zuko.entity.graph-api :as api]
+            [zuko.node :as node]
             [naga.store :as store :refer [StorageType]]))
 
 (def tg-ns "tg")
@@ -23,6 +23,6 @@
 ;; The resolver function takes a single pattern argument, and returns a seq of Result
 (def ResolverFn (=> [Result] [Pattern]))
 
-(def GraphType (s/pred (partial satisfies? api/SimpleGraphAPI)))
+(def GraphType (s/pred (partial satisfies? node/NodeAPI)))
 
 
