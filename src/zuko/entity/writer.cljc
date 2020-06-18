@@ -138,14 +138,15 @@
 #?(:clj
     (s/defn stream->triples :- [Triple]
       "Converts a stream to triples"
-      [io]
+      [graph :- GraphType
+       io]
       (with-open [r (io/reader io)]
         (let [data (j/parse-stream r true)]
-          (entities->triples data))))
+          (entities->triples graph data))))
     
    :cljs
     (s/defn stream->triples :- [Triple]
-      [io]
+      [graph io]
       (throw (ex-info "Unsupported IO" {:io io}))))
 
 (s/defn string->triples :- [Triple]
