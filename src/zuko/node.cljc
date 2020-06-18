@@ -10,7 +10,7 @@
   (new-node [graph] "A function that returns a new node object for the graph")
   (node-id [graph n] "Returns a id for a node. Numbers are good")
   (node-type? [graph a n] "Tests if the argument is a valid node type for this graph, given an attribute")
-  (resolve-pattern [graph pattern] "resolves a simple triple pattern against the graph edges"))
+  (find-triple [graph pattern] "resolves a simple triple pattern against the graph edges"))
 
 (defn node-label
   "Returns a keyword label for a node"

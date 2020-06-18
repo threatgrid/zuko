@@ -16,7 +16,7 @@
   (node-type? [store p n] (and (keyword? n)
                                (= "test" (namespace n))
                                (= \n (first (name n)))))
-  (resolve-pattern [store pattern] data))
+  (find-triple [store pattern] data))
 
 (defn new-graph [] (->TestGraph [0] (atom 0)))
 

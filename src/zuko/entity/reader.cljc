@@ -24,7 +24,7 @@
    Skips non-keyword properties, as these are not created by tg.entity"
   [graph :- GraphType
    entity :- s/Any]
-  (->> (node/resolve-pattern graph [entity '?p '?o])
+  (->> (node/find-triple graph [entity '?p '?o])
        (filter (comp keyword? first))))
 
 
@@ -113,8 +113,8 @@
    ident :- s/Any]
   ;; find the entity by its ident. Some systems will make the id the entity id,
   ;; and the ident will be separate, so look for both.
-  (let [eid (or (ffirst (node/resolve-pattern graph '[?eid :db/id ident]))
-                (ffirst (node/resolve-pattern graph '[?eid :db/ident ident])))]
+  (let [eid (or (ffirst (node/find-triple graph '[?eid :db/id ident]))
+                (ffirst (node/find-triple graph '[?eid :db/ident ident])))]
     (ref->entity graph eid)))
 
 (s/defn graph->entities :- [EntityMap]
@@ -123,7 +123,7 @@
    (graph->entities graph nil))
   ([graph :- GraphType
     exclusions :- (s/maybe #{s/Keyword})]
-   (->> (node/resolve-pattern graph '[?e :tg/entity true])
+   (->> (node/find-triple graph '[?e :tg/entity true])
         (map first)
         (map #(ref->entity graph % exclusions)))))
 
