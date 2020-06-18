@@ -42,11 +42,9 @@
   [pattern :- EPVPattern]
   (filter vartest? pattern))
 
-(defn list-like? [x] (and (sequential? x) (not (vector? x))))
-
 (s/defn filter-pattern? :- s/Bool
   [pattern :- [s/Any]]
-  (and (vector? pattern) (list-like? (first pattern)) (nil? (second pattern))))
+  (and (vector? pattern) (seq? (first pattern)) (nil? (second pattern))))
 
 (defn eval-pattern?
   "eval bindings take the form of [expression var] where the
@@ -61,13 +59,13 @@
 
 (s/defn op-pattern? :- s/Bool
   [[op :as pattern] :- [s/Any]]
-  (and (list-like? pattern) (boolean (some (partial = op) operators))))
+  (and (seq? pattern) (boolean (some (partial = op) operators))))
 
 (def Operators (apply s/enum operators))
 
 (defn unnested-list?
   [[fl :as l]]
-  (and (vector? l) (list-like? fl) (not-any? list-like? fl)))
+  (and (vector? l) (seq? fl) (not-any? seq? fl)))
 
 ;; filters are a vector with an executable list destined for eval
 (def FilterPattern (s/constrained [(s/one [s/Any] "Predicate")]
@@ -82,10 +80,10 @@
 (def OpPattern (s/constrained [(s/one Operators "operator")
                                (s/one (s/recursive #'Pattern) "first pattern")
                                (s/recursive #'Pattern)]
-                              list-like?)) 
+                              seq?)) 
 
-(def Pattern (s/if list-like? OpPattern
-               (s/if (comp list-like? first)
+(def Pattern (s/if seq? OpPattern
+               (s/if (comp seq? first)
                  (s/if (comp nil? second) FilterPattern EvalPattern)
                  EPVPattern)))
 
