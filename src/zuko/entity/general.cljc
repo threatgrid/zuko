@@ -23,6 +23,6 @@
 ;; The resolver function takes a single pattern argument, and returns a seq of Result
 (def ResolverFn (=> [Result] [Pattern]))
 
-(def GraphType (s/pred (partial satisfies? node/NodeAPI)))
+(def GraphType (s/pred #(satisfies? node/NodeAPI %)))
 
 

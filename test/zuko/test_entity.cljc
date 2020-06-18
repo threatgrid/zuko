@@ -8,7 +8,12 @@
                :cljs [schema.test :as st :refer-macros [deftest]])
             #?(:clj  [clojure.test :as t :refer [is]]
                :cljs [clojure.test :as t :refer-macros [is]]))
-  #?(:clj (:import [java.time ZonedDateTime])))
+  #?(:clj (:import [java.time ZonedDateTime])
+     :cljs (:import [goog.date DateTime])))
+
+(defn parseDateTime [s]
+  #?(:clj (ZonedDateTime/parse s)
+     :cljs (DateTime.fromRfc822String s)))
 
 (t/use-fixtures :once st/validate-schemas)
 
@@ -234,8 +239,8 @@
            :observable {:value "01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9",
                         :type "sha256"},
            :disposition_name "Malicious",
-           :valid_time {:start_time (ZonedDateTime/parse "2017-12-05T12:45:32.192Z"),
-                        :end_time (ZonedDateTime/parse "2525-01-01T00:00Z")},
+           :valid_time {:start_time (parseDateTime "2017-12-05T12:45:32.192Z"),
+                        :end_time (parseDateTime "2525-01-01T00:00Z")},
            :module-name "AMP File Reputation",
            :id "verdict:AMP File Reputation:4f390192"}
         new-graph (if-let [n (get-node-ref graph id)]

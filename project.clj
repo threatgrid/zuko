@@ -9,4 +9,26 @@
                  [prismatic/schema "1.1.12"]
                  [cheshire "5.10.0"]]
 
-  :profiles {:dev {:dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}})
+  :plugins [[lein-cljsbuild "1.1.7"]]
+  :profiles {:dev {:dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}}
+  
+  :cljsbuild {
+    :builds {
+      :dev
+      {:source-paths ["src"]
+       :compiler {
+         :output-to "out/zuko/core.js"
+         :optimizations :simple
+         :pretty-print true}
+       :dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}
+      :test
+      {:source-paths ["src" "test"]
+       :compiler {
+         :output-to "out/zuko/test_memory.js"
+         :optimizations :simple
+         :pretty-print true}
+       :dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}
+      }
+    :test-commands {
+      "unit" ["node" "out/zuko/test_memory.js"]}
+    })
