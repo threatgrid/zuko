@@ -213,6 +213,8 @@
     (is (= data obj1))
     (is (= data obj2))))
 
+#?(:cljs (def importer asami.multi-graph.MultiGraph))
+
 (deftest test-multi-update
   (let [graph
         #asami.multi_graph.MultiGraph{:spo #:mem{:node-27367
