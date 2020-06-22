@@ -52,7 +52,9 @@
   (s/validate EntityPropertyPattern '[?x :value 5])
   (s/validate EntityPropertyPattern '[:node ?x 5])
   (s/validate EntityPropertyPattern '[:node :value ?x])
-  (schema-throws? EntityPropertyPattern '[:node "String-Property" "value"]))
+  ;; Naga extension calls for string properties
+  ;; (schema-throws? EntityPropertyPattern [:node "String-Property" "value"])
+  (s/validate EntityPropertyPattern [:node "String-Property" "value"]))
 
 (deftest test-epv-pattern
   (s/validate EPVPattern '[:node :value "value"])
@@ -62,7 +64,9 @@
   (is (epv-pattern? '[:node :value]))
   (is (epv-pattern? '[:node]))
   (schema-throws? EPVPattern '[:node :value "value" :extra])
-  (schema-throws? EPVPattern '(:node "String-Property" "value"))
+  ;; Naga extension calls for string properties
+  ;; (schema-throws? EPVPattern '(:node "String-Property" "value"))
+  (s/validate EPVPattern [:node "String-Property" "value"])
   (schema-throws? EPVPattern '[])
   (is (not (epv-pattern? '[]))))
 
