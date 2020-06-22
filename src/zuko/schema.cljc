@@ -92,7 +92,7 @@
 (def Results [[Value]])
 
 (def EntityPropAxiomElt
-  (s/cond-pre s/Keyword #?(:clj Long :cljs s/Num)))
+  (s/cond-pre s/Keyword s/Str #?(:clj Long :cljs s/Num)))
 
 (def EntityPropValAxiomElt
   (s/conditional (complement symbol?) s/Any))
