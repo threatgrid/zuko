@@ -90,7 +90,8 @@
     s :- [s/Any]]
     (into {} (map (juxt keyfn valfn) s))))
 
-(s/defn divide' :- [[s/Any] [s/Any]]
+(s/defn divide' :- [(s/one [s/Any] "true values")
+                    (s/one [s/Any] "false values")]
   "Takes a predicate and a sequence and returns 2 sequences.
    The first is where the predicate returns true, and the second
    is where the predicate returns false. Note that a nil value
