@@ -252,7 +252,7 @@
                       (-> graph
                           (retract-data retract-existing)
                           (assert-data assertions)))
-                    (let [assertions (ident-map->triples graph (assoc m :id id))]
+                    (let [[assertions] (ident-map->triples graph (assoc m :id id))]
                       (assert-data graph assertions)))]
     (is (= 4 (count (:spo new-graph))))))
 

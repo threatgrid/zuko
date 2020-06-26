@@ -29,6 +29,8 @@
 
 (def ^:dynamic *current-graph* nil)
 
+(def ^:dynamic *id-map* nil)
+
 (def Triple [(s/one s/Any "Entity")
              (s/one s/Keyword "attribute")
              (s/one s/Any "value")])
@@ -97,13 +99,23 @@
     (cons [entity-ref property value-ref] value-data)))
 
 
+(s/defn get-ref
+  [{id :db/id :as data} :- {s/Keyword s/Any}]
+  (or (@*id-map* id)                    ;; an ID that is already mapped
+      (if (and (number? id) (neg? id))  ;; a negative ID is a request for a new saved ID
+        (let [next-id (node/new-node *current-graph*)]
+          (vswap! *id-map* assoc id next-id)
+          next-id))
+      id                                ;; Use the provided ID
+      (node/new-node *current-graph*))) ;; no ID, so create a new one
+
+
 (s/defn map->triples :- EntityTriplesPair
   "Converts a single map to triples. Returns a pair of the map's ID and the triples for the map."
   [data :- {s/Keyword s/Any}]
-  (let [entity-ref (or (:db/id data) (node/new-node *current-graph*))
-        triples-data (doall (mapcat (partial property-vals entity-ref)
-                                    data))]
-    [entity-ref triples-data]))
+  (let [entity-ref (get-ref data)]
+    [entity-ref (if (seq (dissoc data :db/id))
+                  (doall (mapcat (partial property-vals entity-ref) data)))]))
 
 
 (s/defn name-for
@@ -114,25 +126,39 @@
     (node/node-label *current-graph* id)))
 
 
-(s/defn ident-map->triples :- [Triple]
+(s/defn ident-map->triples :- [(s/one [Triple] "The triples representing the ident-map")
+                               (s/one {s/Any s/Any} "The map of IDs in ident-maps to the actual IDs in the triples")]
   "Converts a single map to triples for an ID'ed map"
   ([graph :- GraphType
     j :- EntityMap]
-   (binding [*current-graph* graph]
+   (ident-map->triples graph j {}))
+  ([graph :- GraphType
+    j :- EntityMap
+    id-map :- {s/Any s/Any}]
+   (binding [*current-graph* graph
+             *id-map* (volatile! id-map)]
      (ident-map->triples j)))
   ([j :- EntityMap]
    (let [[node-ref triples] (map->triples j)]
-     (if (:db/ident j)
-       triples
-       (concat [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]] triples)))))
+     [(doall
+       (if (:db/ident j)
+         triples
+         (concat [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]] triples)))
+      @*id-map*])))
 
 
 (s/defn entities->triples :- [Triple]
   "Converts objects into a sequence of triples."
-  [graph :- GraphType
-   entities :- [EntityMap]]
-  (binding [*current-graph* graph]
-    (doall (mapcat ident-map->triples entities))))
+  ([graph :- GraphType
+    entities :- [EntityMap]]
+   (entities->triples graph entities {}))
+  ([graph :- GraphType
+    entities :- [EntityMap]
+    id-map :- {s/Any s/Any}]
+   (binding [*current-graph* graph
+             *id-map* (volatile! id-map)]
+     (let [triples-ids (map ident-map->triples entities)]
+       (doall (mapcat first triples-ids))))))  ;; drop the id maps
 
 
 #?(:clj
