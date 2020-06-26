@@ -7,7 +7,8 @@
                  [org.clojure/clojurescript "1.10.764"]
                  [org.clojars.quoll/naga-store "0.3.5"]
                  [prismatic/schema "1.1.12"]
-                 [cheshire "5.10.0"]]
+                 [cheshire "5.10.0"]
+                 [org.clojars.quoll/qtest "0.1.1"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
   :profiles {:dev {:dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}}

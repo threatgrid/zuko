@@ -4,6 +4,7 @@
             [zuko.helper-stub :as test-helper]
             [asami.multi-graph]
             [asami.core :refer [empty-graph assert-data retract-data q]]
+            [qtest.core :refer [with-fresh-gen]]
             #?(:clj  [schema.test :as st :refer [deftest]]
                :cljs [schema.test :as st :refer-macros [deftest]])
             #?(:clj  [clojure.test :as t :refer [is]]
@@ -213,28 +214,99 @@
     (is (= data obj1))
     (is (= data obj2))))
 
+(deftest test-ident-map->triples
+  (with-fresh-gen
+    (let [data {:id "1234" :prop "value" :attribute 2}
+          [triples1 map1] (ident-map->triples empty-graph data)
+          data2 {:db/id :mem/node-1 :prop "value" :attribute 2}
+          [triples2 map2] (ident-map->triples empty-graph data2)
+          data3 {:db/id -1 :prop "value" :attribute 2}
+          [triples3 map3] (ident-map->triples empty-graph data3)
+          data4 {:db/id -1 :prop "value" :attribute 2}
+          [triples4 map4] (ident-map->triples empty-graph data4 {-1 :mem/node-101})
+          data5 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
+          [triples5 map5] (ident-map->triples empty-graph data5)
+          data6 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
+          [triples6 map6] (ident-map->triples empty-graph data6 {-1 :mem/node-101})
+          data7 {:db/id -1 :prop "value" :sub {:db/id -2} :elts [{:name "one"} {:db/id -2 :name "two"}]}
+          [triples7 map7] (ident-map->triples empty-graph data7)]
+      (is (empty? map1))
+      (is (= [[:tg/node-1 :db/ident :tg/node-1]
+              [:tg/node-1 :tg/entity true]
+              [:tg/node-1 :id "1234"]
+              [:tg/node-1 :prop "value"]
+              [:tg/node-1 :attribute 2]]
+             triples1))
+      (is (empty? map2))
+      (is (= [[:mem/node-1 :db/ident :mem/node-1]
+              [:mem/node-1 :tg/entity true]
+              [:mem/node-1 :prop "value"]
+              [:mem/node-1 :attribute 2]]
+             triples2))
+      (is (= {-1 :tg/node-2} map3))
+      (is (= [[:tg/node-2 :db/ident :tg/node-2]
+              [:tg/node-2 :tg/entity true]
+              [:tg/node-2 :prop "value"]
+              [:tg/node-2 :attribute 2]]
+             triples3))
+      (is (= {-1 :mem/node-101} map4))
+      (is (= [[:mem/node-101 :db/ident :mem/node-101]
+              [:mem/node-101 :tg/entity true]
+              [:mem/node-101 :prop "value"]
+              [:mem/node-101 :attribute 2]]
+             triples4))
+      (is (= {-1 :tg/node-3} map5))
+      (is (= [[:tg/node-3 :db/ident :tg/node-3]
+              [:tg/node-3 :tg/entity true]
+              [:tg/node-3 :prop "value"]
+              [:tg/node-3 :attribute 2]
+              [:tg/node-3 :sub :tg/node-3]]
+             triples5))
+      (is (= {-1 :mem/node-101} map6))
+      (is (= [[:mem/node-101 :db/ident :mem/node-101]
+              [:mem/node-101 :tg/entity true]
+              [:mem/node-101 :prop "value"]
+              [:mem/node-101 :attribute 2]
+              [:mem/node-101 :sub :mem/node-101]]
+             triples6))
+      (is (= {-1 :tg/node-4 -2 :tg/node-5} map7))
+      (is (= [[:tg/node-4 :db/ident :tg/node-4]
+              [:tg/node-4 :tg/entity true]
+              [:tg/node-4 :prop "value"]
+              [:tg/node-4 :sub :tg/node-5]
+              [:tg/node-4 :elts :tg/node-6]
+              [:tg/node-6 :tg/first :tg/node-7]
+              [:tg/node-6 :tg/rest :tg/node-8]
+              [:tg/node-7 :name "one"]
+              [:tg/node-8 :tg/first :tg/node-5]
+              [:tg/node-5 :name "two"]
+              [:tg/node-6 :tg/contains :tg/node-7]
+              [:tg/node-6 :tg/contains :tg/node-5]]
+             triples7))
+      )))
+
 #?(:cljs (def importer asami.multi-graph.MultiGraph))
 
 (deftest test-multi-update
   (let [graph
-        #asami.multi_graph.MultiGraph{:spo #:mem{:node-27367
-                                                 {:db/ident #:mem{:node-27367 {:count 1}},
+        #asami.multi_graph.MultiGraph{:spo #:tg{:node-27367
+                                                 {:db/ident #:tg{:node-27367 {:count 1}},
                                                   :naga/entity {true {:count 1}},
                                                   :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" {:count 1}},
                                                   :type {"sha256" {:count 1}},
                                                   :id {"4f390192" {:count 1}}}},
                                       :pos {:db/ident
-                                            #:mem{:node-27367 #:mem{:node-27367 {:count 1}}},
-                                            :naga/entity {true #:mem{:node-27367 {:count 1}}},
-                                            :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" #:mem{:node-27367 {:count 1}}},
-                                            :type {"sha256" #:mem{:node-27367 {:count 1}}},
-                                            :id {"4f390192" #:mem{:node-27367 {:count 1}}}},
-                                      :osp {:mem/node-27367 #:mem{:node-27367 #:db{:ident {:count 1}}},
-                                            true #:mem{:node-27367 #:naga{:entity {:count 1}}},
+                                            #:tg{:node-27367 #:tg{:node-27367 {:count 1}}},
+                                            :naga/entity {true #:tg{:node-27367 {:count 1}}},
+                                            :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" #:tg{:node-27367 {:count 1}}},
+                                            :type {"sha256" #:tg{:node-27367 {:count 1}}},
+                                            :id {"4f390192" #:tg{:node-27367 {:count 1}}}},
+                                      :osp {:tg/node-27367 #:tg{:node-27367 #:db{:ident {:count 1}}},
+                                            true #:tg{:node-27367 #:naga{:entity {:count 1}}},
                                             "01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9"
-                                            #:mem{:node-27367 {:value {:count 1}}},
-                                            "sha256" #:mem{:node-27367 {:type {:count 1}}},
-                                            "4f390192" #:mem{:node-27367 {:id {:count 1}}}}}
+                                            #:tg{:node-27367 {:value {:count 1}}},
+                                            "sha256" #:tg{:node-27367 {:type {:count 1}}},
+                                            "4f390192" #:tg{:node-27367 {:id {:count 1}}}}}
         id "verdict:AMP File Reputation:4f390192"
         m {:type "verdict",
            :disposition 2,

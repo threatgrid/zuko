@@ -113,9 +113,10 @@
 (s/defn map->triples :- EntityTriplesPair
   "Converts a single map to triples. Returns a pair of the map's ID and the triples for the map."
   [data :- {s/Keyword s/Any}]
-  (let [entity-ref (get-ref data)]
-    [entity-ref (if (seq (dissoc data :db/id))
-                  (doall (mapcat (partial property-vals entity-ref) data)))]))
+  (let [entity-ref (get-ref data)
+        data' (dissoc data :db/id)]
+    [entity-ref (if (seq data')
+                  (doall (mapcat (partial property-vals entity-ref) data')))]))
 
 
 (s/defn name-for
