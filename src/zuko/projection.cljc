@@ -1,6 +1,7 @@
 (ns ^{:doc "Projection functions"
       :author "Paula Gearon"}
     zuko.projection
+  #?(:cljs (:refer-clojure :exclude [Var]))
   (:require [schema.core :as s]
             #?(:cljs [cljs.core :refer [Symbol]]))
   #?(:clj (:import [clojure.lang Symbol])))
