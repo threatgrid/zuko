@@ -98,26 +98,33 @@
   (if-let [[value-ref value-data] (value-triples value)]
     (cons [entity-ref property value-ref] value-data)))
 
+(s/defn new-node
+  [id]
+  (let [next-id (node/new-node *current-graph*)]
+    (vswap! *id-map* assoc (or id next-id) next-id)
+    next-id))
 
 (s/defn get-ref
   [{id :db/id ident :db/ident :as data} :- {s/Keyword s/Any}]
   (if-let [r (@*id-map* id)] ;; an ID that is already mapped
     [r false]
-    (cond                    ;; a negative ID is a request for a new saved ID
-      (and (number? id) (neg? id)) (let [next-id (node/new-node *current-graph*)]
-                                     (vswap! *id-map* assoc id next-id)
-                                     [next-id false])
-                             ;; Use the provided ID
+    (cond ;; a negative ID is a request for a new saved ID
+      (and (number? id) (neg? id)) [(new-node id) false]
+      ;; Use the provided ID
       id (if (node/node-type? *current-graph* :db/id id)
            [id false]
            (throw (ex-info ":db/id must be a value node type" {:db/id id})))
-                             ;; With no ID do an ident lookup
-      ident (let [lookup (node/find-triple *current-graph* ['?n :db/ident ident])]
-              (if (seq lookup)
-                [(ffirst lookup) true]  ;; return the retrieved ref
-                [(node/new-node *current-graph*) false]))  ;; nothing retrieved so generate a new ref
-                             ;; generate an ID
-      :default [(node/new-node *current-graph*) false])))  ;; generate a new ref
+      ;; With no ID do an ident lookup
+      ident (if-let [r (@*id-map* ident)]
+              [r true]
+              (let [lookup (node/find-triple *current-graph* ['?n :db/ident ident])]
+                (if (seq lookup)
+                  (let [read-id (ffirst lookup)]
+                    (vswap! *id-map* assoc ident read-id)
+                    [read-id true]) ;; return the retrieved ref
+                  [(new-node ident) false]))) ;; nothing retrieved so generate a new ref
+      ;; generate an ID
+      :default [(new-node nil) false])))  ;; generate a new ref
 
 
 (s/defn map->triples :- EntityTriplesPair
