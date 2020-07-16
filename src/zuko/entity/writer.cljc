@@ -100,23 +100,34 @@
 
 
 (s/defn get-ref
-  [{id :db/id :as data} :- {s/Keyword s/Any}]
-  (or (@*id-map* id)                    ;; an ID that is already mapped
-      (if (and (number? id) (neg? id))  ;; a negative ID is a request for a new saved ID
-        (let [next-id (node/new-node *current-graph*)]
-          (vswap! *id-map* assoc id next-id)
-          next-id))
-      id                                ;; Use the provided ID
-      (node/new-node *current-graph*))) ;; no ID, so create a new one
+  [{id :db/id ident :db/ident :as data} :- {s/Keyword s/Any}]
+  (if-let [r (@*id-map* id)] ;; an ID that is already mapped
+    [r false]
+    (cond                    ;; a negative ID is a request for a new saved ID
+      (and (number? id) (neg? id)) (let [next-id (node/new-node *current-graph*)]
+                                     (vswap! *id-map* assoc id next-id)
+                                     [next-id false])
+                             ;; Use the provided ID
+      id (if (node/node-type? *current-graph* :db/id id)
+           [id false]
+           (throw (ex-info ":db/id must be a value node type" {:db/id id})))
+                             ;; With no ID do an ident lookup
+      ident (let [lookup (node/find-triple *current-graph* ['?n :db/ident ident])]
+              (if (seq lookup)
+                [(ffirst lookup) true]  ;; return the retrieved ref
+                [(node/new-node *current-graph*) false]))  ;; nothing retrieved so generate a new ref
+                             ;; generate an ID
+      :default [(node/new-node *current-graph*) false])))  ;; generate a new ref
 
 
 (s/defn map->triples :- EntityTriplesPair
   "Converts a single map to triples. Returns a pair of the map's ID and the triples for the map."
   [data :- {s/Keyword s/Any}]
-  (let [entity-ref (get-ref data)
-        data' (dissoc data :db/id)]
-    [entity-ref (if (seq data')
-                  (doall (mapcat (partial property-vals entity-ref) data')))]))
+  (let [[entity-ref ident?] (get-ref data)
+        data (dissoc data :db/id)
+        data (if ident? (dissoc data :db/ident) data)]
+    [entity-ref (if (seq data)
+                  (doall (mapcat (partial property-vals entity-ref) data)))]))
 
 
 (s/defn name-for

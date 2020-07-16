@@ -218,16 +218,16 @@
   (with-fresh-gen
     (let [data {:id "1234" :prop "value" :attribute 2}
           [triples1 map1] (ident-map->triples empty-graph data)
-          data2 {:db/id :mem/node-1 :prop "value" :attribute 2}
+          data2 {:db/id :tg/node-1 :prop "value" :attribute 2}
           [triples2 map2] (ident-map->triples empty-graph data2)
           data3 {:db/id -1 :prop "value" :attribute 2}
           [triples3 map3] (ident-map->triples empty-graph data3)
           data4 {:db/id -1 :prop "value" :attribute 2}
-          [triples4 map4] (ident-map->triples empty-graph data4 {-1 :mem/node-101})
+          [triples4 map4] (ident-map->triples empty-graph data4 {-1 :tg/node-101})
           data5 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
           [triples5 map5] (ident-map->triples empty-graph data5)
           data6 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
-          [triples6 map6] (ident-map->triples empty-graph data6 {-1 :mem/node-101})
+          [triples6 map6] (ident-map->triples empty-graph data6 {-1 :tg/node-101})
           data7 {:db/id -1 :prop "value" :sub {:db/id -2} :elts [{:name "one"} {:db/id -2 :name "two"}]}
           [triples7 map7] (ident-map->triples empty-graph data7)]
       (is (empty? map1))
@@ -238,10 +238,10 @@
               [:tg/node-1 :attribute 2]]
              triples1))
       (is (empty? map2))
-      (is (= [[:mem/node-1 :db/ident :mem/node-1]
-              [:mem/node-1 :tg/entity true]
-              [:mem/node-1 :prop "value"]
-              [:mem/node-1 :attribute 2]]
+      (is (= [[:tg/node-1 :db/ident :tg/node-1]
+              [:tg/node-1 :tg/entity true]
+              [:tg/node-1 :prop "value"]
+              [:tg/node-1 :attribute 2]]
              triples2))
       (is (= {-1 :tg/node-2} map3))
       (is (= [[:tg/node-2 :db/ident :tg/node-2]
@@ -249,11 +249,11 @@
               [:tg/node-2 :prop "value"]
               [:tg/node-2 :attribute 2]]
              triples3))
-      (is (= {-1 :mem/node-101} map4))
-      (is (= [[:mem/node-101 :db/ident :mem/node-101]
-              [:mem/node-101 :tg/entity true]
-              [:mem/node-101 :prop "value"]
-              [:mem/node-101 :attribute 2]]
+      (is (= {-1 :tg/node-101} map4))
+      (is (= [[:tg/node-101 :db/ident :tg/node-101]
+              [:tg/node-101 :tg/entity true]
+              [:tg/node-101 :prop "value"]
+              [:tg/node-101 :attribute 2]]
              triples4))
       (is (= {-1 :tg/node-3} map5))
       (is (= [[:tg/node-3 :db/ident :tg/node-3]
@@ -262,12 +262,12 @@
               [:tg/node-3 :attribute 2]
               [:tg/node-3 :sub :tg/node-3]]
              triples5))
-      (is (= {-1 :mem/node-101} map6))
-      (is (= [[:mem/node-101 :db/ident :mem/node-101]
-              [:mem/node-101 :tg/entity true]
-              [:mem/node-101 :prop "value"]
-              [:mem/node-101 :attribute 2]
-              [:mem/node-101 :sub :mem/node-101]]
+      (is (= {-1 :tg/node-101} map6))
+      (is (= [[:tg/node-101 :db/ident :tg/node-101]
+              [:tg/node-101 :tg/entity true]
+              [:tg/node-101 :prop "value"]
+              [:tg/node-101 :attribute 2]
+              [:tg/node-101 :sub :tg/node-101]]
              triples6))
       (is (= {-1 :tg/node-4 -2 :tg/node-5} map7))
       (is (= [[:tg/node-4 :db/ident :tg/node-4]
