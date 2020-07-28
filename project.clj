@@ -11,7 +11,7 @@
                  [org.clojars.quoll/qtest "0.1.1"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
-  :profiles {:dev {:dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}}
+  :profiles {:dev {:dependencies [[org.clojars.quoll/asami "1.0.0"]]}}
   
   :cljsbuild {
     :builds {
@@ -21,14 +21,14 @@
          :output-to "out/zuko/core.js"
          :optimizations :simple
          :pretty-print true}
-       :dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}
+       :dependencies [[org.clojars.quoll/asami "1.0.0"]]}
       :test
       {:source-paths ["src" "test"]
        :compiler {
          :output-to "out/zuko/test_memory.js"
          :optimizations :simple
          :pretty-print true}
-       :dependencies [[org.clojars.quoll/asami "1.0.0-SNAPSHOT"]]}
+       :dependencies [[org.clojars.quoll/asami "1.0.0"]]}
       }
     :test-commands {
       "unit" ["node" "out/zuko/test_memory.js"]}
