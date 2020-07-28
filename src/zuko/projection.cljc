@@ -73,8 +73,9 @@
         update-pattern (fn [p [t f]]
                          (let [v (if (neg? f) (get-node f) (nth row f))]
                            (assoc p t v)))]
-    (concat node-statements
-            (reduce update-pattern wide-pattern mapping))))
+    (vec
+      (concat node-statements
+        (reduce update-pattern wide-pattern mapping)))))
 
 (s/defn matching-vars :- {s/Num s/Num}
   "Returns pairs of indexes into seqs where the vars match.
