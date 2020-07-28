@@ -138,7 +138,43 @@
           []
           triples))
 
-(s/defn project :- Results
+(s/defn project-single :- s/Any
+  "Returns a single value out of the first row of results, selected by the variable.
+  Throws an exception if the variable does not exist."
+  [v :- Var
+   columns :- [Var]
+   data :- Results]
+  (if-let [col (first (keep-indexed (fn [n c] (when (= v c) n)) columns))]
+    (nth (first data) col)
+    (throw (ex-info (str "Projection variable was not in the selected data: " v) {:var v :data columns}))))
+
+(s/defn project-collection :- [s/Any]
+  "Returns a single value from every row of results, selected by the variable."
+  [v :- Var
+   columns :- [Var]
+   data :- Results]
+  (if-let [col (first (keep-indexed (fn [n c] (when (= v c) n)) columns))]
+    (map #(nth % col) data)
+    (throw (ex-info (str "Projection variable was not in the selected data: " v) {:var v :data columns}))))
+
+(s/defn project-tuple :- [s/Any]
+  "Returns a tuple of values out of the first row of results, selected by the variables.
+  Throws an exception if any of the variables do not exist."
+  [tuple :- [Var]
+   columns :- [Var]
+   data :- Results]
+  (let [width (count tuple)
+        col-mapping (matching-vars tuple columns)
+        row (first data)]
+    (if (= width (count col-mapping))
+      (with-meta (mapv #(nth row (col-mapping %)) (range width)) {:cols tuple})
+      (let [missing (->> (range (count tuple))
+                         (remove col-mapping)
+                         (mapv (partial nth tuple)))]
+        (throw (ex-info (str "Projection variables not found in the selected data: " missing)
+                        {:missing missing :data columns}))))))
+
+(s/defn project-results :- Results
   "Converts each row from a result, into just the requested columns, as per the patterns arg.
    Any specified value in the patterns will be copied into that position in the projection.
    Unbound patterns will generate new nodes for each row.
@@ -149,14 +185,37 @@
              [h1=merry :friend h2=frodo]]"
   [{:keys [new-node node-label] :as store-fns}
    pattern :- [s/Any]
+   columns :- [Var]
    data :- Results]
   (let [full-pattern (vec pattern)
-        columns (:cols (meta data))
         pattern->data (offset-mappings full-pattern columns data)
         nodes (new-nodes pattern->data)]
     (with-meta
       (map #(project-row store-fns full-pattern nodes pattern->data %) data)
       {:cols full-pattern})))
+
+(s/defn project :- s/Any
+  "Converts data from results, into just the requested columns, as per the patterns arg.
+   Depending on the format of the `pattern` argument, different projections may occur.
+   - If the pattern is a sequence of vars, then the associated column in each row of data
+   will be copied into position in each row of results.
+   - If the pattern is a var followed by a dot, then only the first row of data is processed
+   and a single value matching the var will be returned.
+   - If the pattern is a vector containing a var and 3 dots, then only a single value is selected
+   from each row of data and a sequence of those values is returned.
+   - If the pattern is a vector of multiple vars, then only the first row of data is processed
+   and a single vector containing all of the requested results is returned. "
+  [{:keys [new-node node-label] :as store-fns}
+   [v :as pattern] :- [s/Any]
+   data :- Results]
+  (let [length (count pattern)
+        columns (:cols (meta data))]
+    (cond
+      (and (= 2 length) (= '. (second pattern))) (project-single v columns data)
+      (and (= 1 length) (vector? v)) (if (= '... (nth v 1))
+                                       (project-collection (first v) columns data)
+                                       (project-tuple v columns data))
+      :default (project-results store-fns pattern columns data))))
 
 (s/defn insert-project :- Results
   "Similar to project, only the generated data will be in triples for insertion.

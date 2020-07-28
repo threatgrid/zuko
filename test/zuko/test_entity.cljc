@@ -3,7 +3,7 @@
             [zuko.entity.reader :refer [graph->entities ref->entity]]
             [zuko.helper-stub :as test-helper]
             [asami.multi-graph]
-            [asami.core :refer [empty-graph assert-data retract-data q]]
+            [asami.core :refer [empty-graph q]]
             [qtest.core :refer [with-fresh-gen]]
             #?(:clj  [schema.test :as st :refer [deftest]]
                :cljs [schema.test :as st :refer-macros [deftest]])
@@ -17,6 +17,9 @@
      :cljs (DateTime.fromRfc822String s)))
 
 (t/use-fixtures :once st/validate-schemas)
+
+(def assert-data #'asami.core/assert-data)
+(def retract-data #'asami.core/retract-data)
 
 (deftest test-encode-from-string
   (let [m1 (string->triples (test-helper/new-graph)
