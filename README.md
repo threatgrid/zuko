@@ -1,6 +1,9 @@
 # Zuko
 
 This is a Clojure/ClojureScript library that works with other Threatgrid data applications.
+
+[![Clojars Project](http://clojars.org/org.clojars.quoll/zuko/latest-version.svg)](http://clojars.org/org.clojars.quoll/zuko)
+
 The initial applications using this library are
 [Naga](https://github.com/threatgrid/naga) and [Asami](https://github.com/threatgrid/asami).
 
