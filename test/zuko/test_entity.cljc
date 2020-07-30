@@ -288,8 +288,7 @@
              triples7))
       )))
 
-#?(:cljs (def importer asami.multi-graph.MultiGraph))
-
+#?(:clj 
 (deftest test-multi-update
   (let [graph
         #asami.multi_graph.MultiGraph{:spo #:tg{:node-27367
@@ -329,6 +328,6 @@
                           (assert-data assertions)))
                     (let [[assertions] (ident-map->triples graph (assoc m :id id))]
                       (assert-data graph assertions)))]
-    (is (= 4 (count (:spo new-graph))))))
+    (is (= 4 (count (:spo new-graph)))))))
 
 #?(:cljs (t/run-tests))
