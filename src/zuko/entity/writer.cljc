@@ -161,7 +161,7 @@
    (let [[node-ref triples] (map->triples j)]
      [(doall
        (if (:db/ident j)
-         triples
+         (cons [node-ref :tg/entity true] triples)
          (concat [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]] triples)))
       @*id-map*])))
 
