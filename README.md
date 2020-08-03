@@ -1,8 +1,8 @@
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 # Zuko
 
 This is a Clojure/ClojureScript library that works with other Threatgrid data applications.
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 [![Clojars Project](http://clojars.org/org.clojars.quoll/zuko/latest-version.svg)](http://clojars.org/org.clojars.quoll/zuko)
 
 The initial applications using this library are
