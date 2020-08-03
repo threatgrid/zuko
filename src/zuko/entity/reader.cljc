@@ -76,6 +76,16 @@
     prop-val))
 
 
+(s/defn into-multimap
+  "Takes key/value tuples and inserts them into a map. If there are duplicate keys then create a set for the values."
+  [kvs :- [[(s/one s/Any "Key") (s/one s/Any "Value")]]]
+  (persistent!
+   (reduce (fn [m [k v]]
+             (assoc! m k (if-let [[km vm] (find m k)]
+                           (if (set? vm) (conj vm v) #{vm v})
+                           v)))
+           (transient {}) kvs)))
+
 (s/defn pairs->struct :- EntityMap
   "Uses a set of property-value pairs to load up a nested data structure from the graph"
   ([graph :- GraphType
@@ -89,7 +99,7 @@
           (remove (comp #{:db/id :db/ident :tg/entity} first))
           (remove (comp seen second))
           (map (partial recurse-node graph seen))
-          (into {})))))
+          into-multimap))))
 
 
 (s/defn ref->entity :- EntityMap

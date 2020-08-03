@@ -95,8 +95,11 @@
    and builds triples around it"
   [entity-ref :- s/Any
    [property value] :- KeyValue]
-  (if-let [[value-ref value-data] (value-triples value)]
-    (cons [entity-ref property value-ref] value-data)))
+  (if (set? value)
+    (mapcat #(if-let [[vr vd] (value-triples %)]
+               (cons [entity-ref property vr] vd)) (seq value))
+    (if-let [[value-ref value-data] (value-triples value)]
+      (cons [entity-ref property value-ref] value-data))))
 
 (s/defn new-node
   [id]

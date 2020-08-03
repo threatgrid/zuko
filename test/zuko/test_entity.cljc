@@ -232,7 +232,9 @@
           data6 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
           [triples6 map6] (ident-map->triples empty-graph data6 {-1 :tg/node-101})
           data7 {:db/id -1 :prop "value" :sub {:db/id -2} :elts [{:name "one"} {:db/id -2 :name "two"}]}
-          [triples7 map7] (ident-map->triples empty-graph data7)]
+          [triples7 map7] (ident-map->triples empty-graph data7)
+          data8 {:db/id -1 :prop #{"value1" "value2"} :attribute 2}
+          [triples8 map8] (ident-map->triples empty-graph data8)]
       (is (= {:tg/node-1 :tg/node-1} map1))
       (is (= [[:tg/node-1 :db/ident :tg/node-1]
               [:tg/node-1 :tg/entity true]
@@ -286,6 +288,13 @@
               [:tg/node-6 :tg/contains :tg/node-7]
               [:tg/node-6 :tg/contains :tg/node-5]]
              triples7))
+      (is (= {-1 :tg/node-9} map8))
+      (is (= [[:tg/node-9 :db/ident :tg/node-9]
+              [:tg/node-9 :tg/entity true]
+              [:tg/node-9 :prop "value1"]
+              [:tg/node-9 :prop "value2"]
+              [:tg/node-9 :attribute 2]]
+             triples8))
       )))
 
 #?(:clj 
