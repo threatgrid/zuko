@@ -8,7 +8,7 @@ The initial applications using this library are
 [Naga](https://github.com/threatgrid/naga) and [Asami](https://github.com/threatgrid/asami).
 
 This library provides functionality for:
-- Managing data (especially JSON data) in a graph database.
+- Managing data (especially JSON data) in a graph database. Asami describes this in the [wiki entry for Entity Structures](https://github.com/threatgrid/asami/wiki/Entity-Structure).
 - Projecting data into tuples suitable for query results or insertion into a graph database.
 - General utilities to avoid duplicating code between projects.
 
@@ -19,7 +19,7 @@ Include a dependency to this library.
 In Leiningen:
 
 ```clojure
-[org.clojars.quoll/zuko "0.1.1"]
+[org.clojars.quoll/zuko "0.1.4"]
 ```
 
 In `deps.edn`:
@@ -27,7 +27,7 @@ In `deps.edn`:
 ```clojure
 {
   :deps {
-    org.clojars.quoll/zuko {:mvn/version "0.1.1"}
+    org.clojars.quoll/zuko {:mvn/version "0.1.4"}
   }
 }
 ```
