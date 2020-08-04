@@ -1,0 +1,11 @@
+language: clojure
+lein: 2.9.4
+
+before_script:
+- mkdir -p out/zuko
+- touch out/zuko/core.js out/zuko/test_memory.js
+- touch src/zuko/* test/zuko/*
+
+script:
+- lein test
+- lein cljsbuild test
