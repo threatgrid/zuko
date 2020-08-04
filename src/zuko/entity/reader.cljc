@@ -86,6 +86,7 @@
                            v)))
            (transient {}) kvs)))
 
+
 (s/defn pairs->struct :- EntityMap
   "Uses a set of property-value pairs to load up a nested data structure from the graph"
   ([graph :- GraphType
@@ -99,6 +100,7 @@
           (remove (comp #{:db/id :db/ident :tg/entity} first))
           (remove (comp seen second))
           (map (partial recurse-node graph seen))
+          (map (fn [[a v :as av]] (if (seq? v) [a (vec v)] av)))
           into-multimap))))
 
 
