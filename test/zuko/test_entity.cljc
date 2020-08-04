@@ -161,7 +161,8 @@
         dr7 (round-trip d7)
 
         d8 #{{:prop "val" :arr #{{:a 1} {:a 2} ["nested"]}}}
-        dr8 (set (map #(update % :arr set) (round-trip d8)))]
+        dr8 (round-trip d8)]
+
     (is (= d1 dr1))
     (is (= d2 dr2))
     (is (= d3 dr3))
@@ -221,38 +222,46 @@
   (with-fresh-gen
     (let [data {:id "1234" :prop "value" :attribute 2}
           [triples1 map1] (ident-map->triples empty-graph data)
-          data2 {:db/id :tg/node-1 :prop "value" :attribute 2}
+          node1 (ffirst map1)
+          data2 {:db/id node1 :prop "value" :attribute 2}
           [triples2 map2] (ident-map->triples empty-graph data2)
           data3 {:db/id -1 :prop "value" :attribute 2}
           [triples3 map3] (ident-map->triples empty-graph data3)
+          node2 (get map3 -1)
           data4 {:db/id -1 :prop "value" :attribute 2}
           [triples4 map4] (ident-map->triples empty-graph data4 {-1 :tg/node-101})
           data5 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
           [triples5 map5] (ident-map->triples empty-graph data5)
+          node3 (get map5 -1)
           data6 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
           [triples6 map6] (ident-map->triples empty-graph data6 {-1 :tg/node-101})
           data7 {:db/id -1 :prop "value" :sub {:db/id -2} :elts [{:name "one"} {:db/id -2 :name "two"}]}
           [triples7 map7] (ident-map->triples empty-graph data7)
+          node4 (get map7 -1)
+          node5 (get map7 -2)
+          node6 (->> triples7 (filter #(= :elts (second %))) first last)
+          node7 (-> map7 (dissoc -1) (dissoc -2) ffirst)
+          node8 (->> triples7 (filter #(= :tg/rest (second %))) first last)
           data8 {:db/id -1 :prop #{"value1" "value2"} :attribute 2}
-          [triples8 map8] (ident-map->triples empty-graph data8)]
-      (is (= {:tg/node-1 :tg/node-1} map1))
-      (is (= [[:tg/node-1 :db/ident :tg/node-1]
-              [:tg/node-1 :tg/entity true]
-              [:tg/node-1 :id "1234"]
-              [:tg/node-1 :prop "value"]
-              [:tg/node-1 :attribute 2]]
+          [triples8 map8] (ident-map->triples empty-graph data8)
+          node9 (get map8 -1)]
+      (is (= {node1 node1} map1))
+      (is (= [[node1 :db/ident node1]
+              [node1 :tg/entity true]
+              [node1 :id "1234"]
+              [node1 :prop "value"]
+              [node1 :attribute 2]]
              triples1))
       (is (empty? map2))
-      (is (= [[:tg/node-1 :db/ident :tg/node-1]
-              [:tg/node-1 :tg/entity true]
-              [:tg/node-1 :prop "value"]
-              [:tg/node-1 :attribute 2]]
+      (is (= [[node1 :db/ident node1]
+              [node1 :tg/entity true]
+              [node1 :prop "value"]
+              [node1 :attribute 2]]
              triples2))
-      (is (= {-1 :tg/node-2} map3))
-      (is (= [[:tg/node-2 :db/ident :tg/node-2]
-              [:tg/node-2 :tg/entity true]
-              [:tg/node-2 :prop "value"]
-              [:tg/node-2 :attribute 2]]
+      (is (= [[node2 :db/ident node2]
+              [node2 :tg/entity true]
+              [node2 :prop "value"]
+              [node2 :attribute 2]]
              triples3))
       (is (= {-1 :tg/node-101} map4))
       (is (= [[:tg/node-101 :db/ident :tg/node-101]
@@ -260,12 +269,12 @@
               [:tg/node-101 :prop "value"]
               [:tg/node-101 :attribute 2]]
              triples4))
-      (is (= {-1 :tg/node-3} map5))
-      (is (= [[:tg/node-3 :db/ident :tg/node-3]
-              [:tg/node-3 :tg/entity true]
-              [:tg/node-3 :prop "value"]
-              [:tg/node-3 :attribute 2]
-              [:tg/node-3 :sub :tg/node-3]]
+      (is (= {-1 node3} map5))
+      (is (= [[node3 :db/ident node3]
+              [node3 :tg/entity true]
+              [node3 :prop "value"]
+              [node3 :attribute 2]
+              [node3 :sub node3]]
              triples5))
       (is (= {-1 :tg/node-101} map6))
       (is (= [[:tg/node-101 :db/ident :tg/node-101]
@@ -274,26 +283,25 @@
               [:tg/node-101 :attribute 2]
               [:tg/node-101 :sub :tg/node-101]]
              triples6))
-      (is (= {-1 :tg/node-4 -2 :tg/node-5 :tg/node-7 :tg/node-7} map7))
-      (is (= [[:tg/node-4 :db/ident :tg/node-4]
-              [:tg/node-4 :tg/entity true]
-              [:tg/node-4 :prop "value"]
-              [:tg/node-4 :sub :tg/node-5]
-              [:tg/node-4 :elts :tg/node-6]
-              [:tg/node-6 :tg/first :tg/node-7]
-              [:tg/node-6 :tg/rest :tg/node-8]
-              [:tg/node-7 :name "one"]
-              [:tg/node-8 :tg/first :tg/node-5]
-              [:tg/node-5 :name "two"]
-              [:tg/node-6 :tg/contains :tg/node-7]
-              [:tg/node-6 :tg/contains :tg/node-5]]
+      (is (= {-1 node4 -2 node5 node7 node7} map7))
+      (is (= [[node4 :db/ident node4]
+              [node4 :tg/entity true]
+              [node4 :prop "value"]
+              [node4 :sub node5]
+              [node4 :elts node6]
+              [node6 :tg/first node7]
+              [node6 :tg/rest node8]
+              [node7 :name "one"]
+              [node8 :tg/first node5]
+              [node5 :name "two"]
+              [node6 :tg/contains node7]
+              [node6 :tg/contains node5]]
              triples7))
-      (is (= {-1 :tg/node-9} map8))
-      (is (= [[:tg/node-9 :db/ident :tg/node-9]
-              [:tg/node-9 :tg/entity true]
-              [:tg/node-9 :prop "value1"]
-              [:tg/node-9 :prop "value2"]
-              [:tg/node-9 :attribute 2]]
+      (is (= [[node9 :db/ident node9]
+              [node9 :tg/entity true]
+              [node9 :prop "value1"]
+              [node9 :prop "value2"]
+              [node9 :attribute 2]]
              triples8))
       )))
 
