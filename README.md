@@ -1,4 +1,4 @@
-# Zuko [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+# Zuko [![Build Status](https://travis-ci.org/threatgrid/zuko.svg?branch=main)](https://travis-ci.org/threatgrid/zuko) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 This is a Clojure/ClojureScript library that works with other Threatgrid data applications.
 
@@ -9,7 +9,7 @@ The initial applications using this library are
 
 This library provides functionality for:
 - Managing data (especially JSON data) in a graph database. Asami describes this in the [wiki entry for Entity Structures](https://github.com/threatgrid/asami/wiki/Entity-Structure).
-- Projecting data into tuples suitable for query results or insertion into a graph database.
+- Projecting data into tuples suitable for query results or insertion into a graph database. Generation of this data with Zuko is discussed in [Asami](https://github.com/threatgrid/asami/wiki/Entity-Structure).
 - General utilities to avoid duplicating code between projects.
 
 ## Usage
@@ -19,7 +19,7 @@ Include a dependency to this library.
 In Leiningen:
 
 ```clojure
-[org.clojars.quoll/zuko "0.1.4"]
+[org.clojars.quoll/zuko "0.2.0"]
 ```
 
 In `deps.edn`:
@@ -27,7 +27,7 @@ In `deps.edn`:
 ```clojure
 {
   :deps {
-    org.clojars.quoll/zuko {:mvn/version "0.1.4"}
+    org.clojars.quoll/zuko {:mvn/version "0.2.0"}
   }
 }
 ```
