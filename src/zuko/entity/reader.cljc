@@ -59,6 +59,13 @@
           (cons first-elt (build-list graph seen (property-values graph remaining)))
           (list first-elt))))))
 
+(s/defn vbuild-list :- [s/Any]
+  "Calls build-list, converting to a vector as the final step"
+  [graph :- GraphType
+   seen :- #{s/Any}
+   pairs :- [KeyValue]]
+  (let [l (build-list graph seen pairs)]
+    (if (seq? l) (vec l) l)))
 
 (s/defn recurse-node :- s/Any
   "Determines if the val of a map entry is a node to be recursed on, and loads if necessary.
@@ -71,7 +78,7 @@
       [prop (if-let [ident (some (fn [[k v]] (if (= :db/ident k) v)) pairs)]
               {:db/ident ident}
               {:db/id v})]
-      [prop (or (build-list graph seen pairs)
+      [prop (or (vbuild-list graph seen pairs)
                 (pairs->struct graph pairs (conj seen v)))])
     prop-val))
 
@@ -103,7 +110,7 @@
     prop-vals :- [KeyValue]
     seen :- #{s/Keyword}]
    (if (some (fn [[k _]] (= :tg/first k)) prop-vals)
-     (build-list graph seen prop-vals)
+     (vbuild-list graph seen prop-vals)
      (do
        (->> prop-vals
             (remove (comp #{:db/id :db/ident :tg/entity} first))
