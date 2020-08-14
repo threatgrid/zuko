@@ -37,10 +37,7 @@
   [x]
   (and (symbol? x) (boolean (#{\? \%} (first (name x))))))
 
-(s/defn vars :- [s/Symbol]
-  "Return a seq of all variables in a pattern"
-  [pattern :- EPVPattern]
-  (filter vartest? pattern))
+(defn ^:deprecated vars [c] (filter vartest? c))
 
 (s/defn filter-pattern? :- s/Bool
   [pattern :- [s/Any]]
@@ -82,7 +79,8 @@
                                (s/recursive #'Pattern)]
                               seq?)) 
 
-(def Pattern (s/if seq? OpPattern
+(def Pattern (s/if seq?
+               OpPattern
                (s/if (comp seq? first)
                  (s/if (comp nil? second) FilterPattern EvalPattern)
                  EPVPattern)))

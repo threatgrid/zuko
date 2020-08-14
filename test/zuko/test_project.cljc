@@ -14,7 +14,8 @@
                           (project-tuple tuple '[?q ?t ?c ?b ?z ?d] data)))
 
     (let [mdata (with-meta data {:cols columns})]
-      (is (= [6 4 3] (project {} [tuple] mdata))))))
+      (is (= [6 4 3] (project {} [tuple] mdata)))
+      (is (= [3] (project {} '[[?c]] mdata))))))
 
 (deftest test-project-single
   (let [columns '[?q ?t ?c ?b ?z ?a]

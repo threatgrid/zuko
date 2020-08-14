@@ -213,7 +213,7 @@
         columns (:cols (meta data))]
     (cond
       (and (= 2 length) (= '. (second pattern))) (project-single v columns data)
-      (and (= 1 length) (vector? v)) (if (= '... (nth v 1))
+      (and (= 1 length) (vector? v)) (if (and (= 2 (count v)) (= '... (nth v 1)))
                                        (project-collection (first v) columns data)
                                        (project-tuple v columns data))
       :default (project-results store-fns pattern columns data))))
