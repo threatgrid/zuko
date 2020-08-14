@@ -108,6 +108,7 @@
     next-id))
 
 (s/defn get-ref
+  "Returns the reference for an object, and a flag to indicate if a new reference was generated"
   [{id :db/id ident :db/ident :as data} :- {s/Keyword s/Any}]
   (if-let [r (@*id-map* id)] ;; an ID that is already mapped
     [r false]
