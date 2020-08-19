@@ -164,8 +164,7 @@
   [tuple :- [Var]
    columns :- [Var]
    data :- Results]
-  (if-not (seq data)
-    '()
+  (when (seq data)
     (let [width (count tuple)
           col-mapping (matching-vars tuple columns)
           row (first data)]

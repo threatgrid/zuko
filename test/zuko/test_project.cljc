@@ -10,12 +10,15 @@
         columns '[?q ?t ?c ?b ?z ?a]
         data [[1 2 3 4 5 6] [7 8 9 10 11 12]]]
     (is (= [6 4 3] (project-tuple tuple columns data)))
+    (is (= nil (project-tuple tuple columns nil)))
+    (is (= nil (project-tuple tuple columns '())))
     (is (thrown-with-msg? ExceptionInfo #"Projection variables not found in the selected data: \[\?a\]"
                           (project-tuple tuple '[?q ?t ?c ?b ?z ?d] data)))
 
     (let [mdata (with-meta data {:cols columns})]
       (is (= [6 4 3] (project {} [tuple] mdata)))
-      (is (= [3] (project {} '[[?c]] mdata))))))
+      (is (= [3] (project {} '[[?c]] mdata)))
+      (is (= nil (project {} '[[?c]] (with-meta '() {:cols columns})))))))
 
 (deftest test-project-single
   (let [columns '[?q ?t ?c ?b ?z ?a]
