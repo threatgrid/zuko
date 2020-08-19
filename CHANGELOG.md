@@ -4,7 +4,19 @@
 ### Changed
 
 
-## [0.2.2] - 2020-08-05
+## [0.2.4] - 2020-08-19
+### Fixed
+- Projecting to a tuple from empty results now returns `nil` instead of a vector containing `nil`.
+
+
+## 0.2.3 - 2020-08-14
+### Fixed
+- Projecting to a single element tuple is fixed.
+
+### Changed
+- Deprecated the `vars` function in schema.
+
+## 0.2.2 - 2020-08-05
 ### Changed
 - Entity read/write now supports multi-arity attributes. These come in and go out as sets of values.
 
@@ -19,5 +31,5 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.1.1...HEAD
-[0.2.2]: https://github.com/threatgrid/zuko/compare/0.2.2...0.1.0
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.2.4...HEAD
+[0.2.4]: https://github.com/threatgrid/zuko/compare/0.2.3...0.2.4
