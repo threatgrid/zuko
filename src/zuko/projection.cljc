@@ -164,16 +164,18 @@
   [tuple :- [Var]
    columns :- [Var]
    data :- Results]
-  (let [width (count tuple)
-        col-mapping (matching-vars tuple columns)
-        row (first data)]
-    (if (= width (count col-mapping))
-      (with-meta (mapv #(nth row (col-mapping %)) (range width)) {:cols tuple})
-      (let [missing (->> (range (count tuple))
-                         (remove col-mapping)
-                         (mapv (partial nth tuple)))]
-        (throw (ex-info (str "Projection variables not found in the selected data: " missing)
-                        {:missing missing :data columns}))))))
+  (if-not (seq data)
+    '()
+    (let [width (count tuple)
+          col-mapping (matching-vars tuple columns)
+          row (first data)]
+      (if (= width (count col-mapping))
+        (with-meta (mapv #(nth row (col-mapping %)) (range width)) {:cols tuple})
+        (let [missing (->> (range (count tuple))
+                           (remove col-mapping)
+                           (mapv (partial nth tuple)))]
+          (throw (ex-info (str "Projection variables not found in the selected data: " missing)
+                          {:missing missing :data columns})))))))
 
 (s/defn project-results :- Results
   "Converts each row from a result, into just the requested columns, as per the patterns arg.
