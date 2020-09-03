@@ -168,7 +168,10 @@
         dr7 (round-trip d7)
 
         d8 #{{:prop "val" :arr #{{:a 1} {:a 2} ["nested"]}}}
-        dr8 (round-trip d8)]
+        dr8 (round-trip d8)
+
+        d9 #{{:prop "val", :p2 22, :p3 []}}
+        dr9 (round-trip d9)]
 
     (is (= d1 dr1))
     (is (= d2 dr2))
@@ -177,7 +180,8 @@
     (is (= d5 dr5))
     (is (= d6 dr6))
     (is (= d7 dr7))
-    (is (= d8 dr8))))
+    (is (= d8 dr8))
+    (is (= d9 dr9))))
 
 (defn generate-diff
   [o1 o2]
