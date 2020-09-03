@@ -2,8 +2,10 @@
   (:require [zuko.entity.writer :refer [string->triples entities->triples entity-update->triples ident-map->triples]]
             [zuko.entity.reader :refer [graph->entities ref->entity]]
             [zuko.helper-stub :as test-helper]
+            [asami.graph :refer [graph-transact]]
             [asami.multi-graph]
-            [asami.core :refer [empty-graph q]]
+            [asami.memory :refer [empty-graph]]
+            [asami.core :refer [q]]
             [qtest.core :refer [with-fresh-gen]]
             #?(:clj  [schema.test :as st :refer [deftest]]
                :cljs [schema.test :as st :refer-macros [deftest]])
@@ -18,8 +20,14 @@
 
 (t/use-fixtures :once st/validate-schemas)
 
-(def assert-data #'asami.core/assert-data)
-(def retract-data #'asami.core/retract-data)
+(defn assert-data
+  [graph data]
+  (graph-transact graph 0 data nil))
+
+(defn retract-data
+  [graph data]
+  (graph-transact graph 0 nil data))
+
 
 (deftest test-encode-from-string
   (let [m1 (string->triples (test-helper/new-graph)
