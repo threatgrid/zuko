@@ -68,16 +68,18 @@
           [value-ref triples] (value-triples v)
           [next-ref next-triples] (list-triples vs)]
       [node-ref (concat [[node-ref (node/data-attribute *current-graph* value-ref) value-ref]]
-                  (when next-ref [[node-ref :tg/rest next-ref]])
-                  triples
-                  next-triples)])))
+                        (when next-ref [[node-ref :tg/rest next-ref]])
+                        triples
+                        next-triples)])))
 
 (s/defn value-triples-list :- EntityTriplesPair
   [vlist :- [s/Any]]
-  (let [[node triples :as raw-result] (list-triples vlist)]
-    (if triples
-      [node (concat triples (containership-triples node triples))]
-      raw-result)))
+  (if (seq vlist)
+    (let [[node triples :as raw-result] (list-triples vlist)]
+      (if triples
+        [node (concat triples (containership-triples node triples))]
+        raw-result))
+    [:tg/empty-list nil]))
 
 (s/defn value-triples
   "Converts a value into a list of triples.

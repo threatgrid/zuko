@@ -91,7 +91,9 @@
                           [{:prop "val"} {:prop "val2"}])
         m5 (entities->triples (test-helper/new-graph)
                           [{:prop "val"
-                            :arr [{:a 1} {:a 2} ["nested"]]}])]
+                            :arr [{:a 1} {:a 2} ["nested"]]}])
+        m6 (entities->triples (test-helper/new-graph)
+                          [{:prop "val", :p2 22, :p3 []}])]
     (is (= [[:test/n1 :db/ident :test/n1]
             [:test/n1 :tg/entity true]
             [:test/n1 :prop "val"]] m1))
@@ -130,7 +132,12 @@
             [:test/n7 :tg/contains "nested"]
             [:test/n2 :tg/contains :test/n3]
             [:test/n2 :tg/contains :test/n5]
-            [:test/n2 :tg/contains :test/n7]] m5))))
+            [:test/n2 :tg/contains :test/n7]] m5))
+    (is (= [[:test/n1 :db/ident :test/n1] 
+            [:test/n1 :tg/entity true]
+            [:test/n1 :prop "val"]
+            [:test/n1 :p2 22]
+            [:test/n1 :p3 :tg/empty-list]] m6))))
 
 (defn round-trip
   [data]

@@ -50,14 +50,15 @@
   ;; convert the data to a map
   (let [st (into {} pairs)]
     ;; if the properties indicate a list, then process it
-    (when-let [first-prop-elt (get-tg-first st)]
+    (if-let [first-prop-elt (get-tg-first st)]
       (let [remaining (:tg/rest st)
             [_ first-elt] (recurse-node graph seen first-prop-elt)]
         (assert first-elt)
         ;; recursively build the list
         (if remaining
           (cons first-elt (build-list graph seen (property-values graph remaining)))
-          (list first-elt))))))
+          (list first-elt)))
+      (when (= :tg/list (:tg/type st)) []))))
 
 (s/defn vbuild-list :- [s/Any]
   "Calls build-list, converting to a vector as the final step"
@@ -80,7 +81,9 @@
               {:db/id v})]
       [prop (or (vbuild-list graph seen pairs)
                 (pairs->struct graph pairs (conj seen v)))])
-    prop-val))
+    (if (= :tg/empty-list v)
+      [prop []]
+      prop-val)))
 
 
 (s/defn into-multimap
