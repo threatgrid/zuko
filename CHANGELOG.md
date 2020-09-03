@@ -4,6 +4,11 @@
 ### Changed
 
 
+## [0.3.0] - 2020-09-03
+### Added
+- Supporting empty arrays.
+
+
 ## [0.2.4] - 2020-08-19
 ### Fixed
 - Projecting to a tuple from empty results now returns `nil` instead of a vector containing `nil`.
@@ -31,5 +36,6 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.2.4...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/threatgrid/zuko/compare/0.2.4...0.3.0
 [0.2.4]: https://github.com/threatgrid/zuko/compare/0.2.3...0.2.4
