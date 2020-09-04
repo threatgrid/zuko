@@ -4,6 +4,11 @@
 ### Changed
 
 
+## [0.3.1] - 2020-09-04
+### Fixed
+- Now binding id-map for entity updates.
+
+
 ## [0.3.0] - 2020-09-03
 ### Added
 - Supporting empty arrays.
@@ -36,6 +41,7 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.3.1...HEAD
+[0.3.1]: https://github.com/threatgrid/zuko/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/threatgrid/zuko/compare/0.2.4...0.3.0
 [0.2.4]: https://github.com/threatgrid/zuko/compare/0.2.3...0.2.4
