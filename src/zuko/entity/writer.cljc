@@ -222,7 +222,8 @@
   [graph :- GraphType
    node-ref  ;; a reference for the structure to be updated
    entity]   ;; the structure to update the structure in the database to
-  (binding [*current-graph* graph]
+  (binding [*current-graph* graph
+            *id-map* (volatile! {})]
     (let [pvs (reader/property-values graph node-ref)
           old-node (reader/pairs->struct graph pvs)
           to-remove (remove (fn [[k v]] (if-let [newv (get entity k)] (= v newv))) old-node)
