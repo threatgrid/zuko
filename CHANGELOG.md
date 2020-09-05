@@ -5,8 +5,12 @@
 
 
 ## [0.3.1] - 2020-09-04
+### Added
+- Added support for nil values and array entries.
+
 ### Fixed
 - Now binding id-map for entity updates.
+- Removed references to the naga namespace.
 
 
 ## [0.3.0] - 2020-09-03
