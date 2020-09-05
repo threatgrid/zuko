@@ -329,18 +329,18 @@
   (let [graph
         #asami.multi_graph.MultiGraph{:spo #:tg{:node-27367
                                                  {:db/ident #:tg{:node-27367 {:count 1}},
-                                                  :naga/entity {true {:count 1}},
+                                                  :tg/entity {true {:count 1}},
                                                   :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" {:count 1}},
                                                   :type {"sha256" {:count 1}},
                                                   :id {"4f390192" {:count 1}}}},
                                       :pos {:db/ident
                                             #:tg{:node-27367 #:tg{:node-27367 {:count 1}}},
-                                            :naga/entity {true #:tg{:node-27367 {:count 1}}},
+                                            :tg/entity {true #:tg{:node-27367 {:count 1}}},
                                             :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" #:tg{:node-27367 {:count 1}}},
                                             :type {"sha256" #:tg{:node-27367 {:count 1}}},
                                             :id {"4f390192" #:tg{:node-27367 {:count 1}}}},
                                       :osp {:tg/node-27367 #:tg{:node-27367 #:db{:ident {:count 1}}},
-                                            true #:tg{:node-27367 #:naga{:entity {:count 1}}},
+                                            true #:tg{:node-27367 #:tg{:entity {:count 1}}},
                                             "01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9"
                                             #:tg{:node-27367 {:value {:count 1}}},
                                             "sha256" #:tg{:node-27367 {:type {:count 1}}},
