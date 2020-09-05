@@ -54,10 +54,11 @@
       (let [remaining (:tg/rest st)
             [_ first-elt] (recurse-node graph seen first-prop-elt)]
         (assert first-elt)
-        ;; recursively build the list
-        (if remaining
-          (cons first-elt (build-list graph seen (property-values graph remaining)))
-          (list first-elt)))
+        (let [head-elt (if (= :tg/nil first-elt) nil first-elt)]
+          ;; recursively build the list
+          (if remaining
+            (cons head-elt (build-list graph seen (property-values graph remaining)))
+            (list head-elt))))
       (when (= :tg/list (:tg/type st)) []))))
 
 (s/defn vbuild-list :- [s/Any]
@@ -118,6 +119,7 @@
        (->> prop-vals
             (remove (comp #{:db/id :db/ident :tg/entity} first))
             (remove (comp seen second))
+            (map (fn [[a v :as av]] (if (= :tg/nil v) [a nil] av)))
             (map (partial recurse-node graph seen))
             (map (fn [[a v :as av]] (if (seq? v) [a (vec v)] av)))
             into-multimap)))))

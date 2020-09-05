@@ -89,7 +89,7 @@
     (sequential? v) (value-triples-list v)
     (set? v) (value-triples-list (seq v))
     (map? v) (map->triples v)
-    (nil? v) nil
+    (nil? v) [:tg/nil nil]
     :default [v nil]))
 
 (s/defn property-vals :- [Triple]
