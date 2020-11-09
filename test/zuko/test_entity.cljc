@@ -233,9 +233,20 @@
         ref (get-node-ref graph' "1234")
         graph (assert-data graph' [[ref "Connected_To" ref]])
         obj1 (ref->entity graph ref)
-        obj2 (ref->entity graph ref #{"Connected_To"})]
+        obj2 (ref->entity graph ref false #{"Connected_To"})]
     (is (= data obj1))
     (is (= data obj2))))
+
+(deftest test-nested-ref->entity
+  (let [d0 {:db/ident "abcd" :prop "nested" :attribute 5}
+        data {:id "1234" :prop "value" :attribute 2 :sub {:db/ident "abcd"}}
+        m (entities->triples empty-graph [d0 data])
+        graph (assert-data empty-graph m)
+        ref (get-node-ref graph "1234")
+        obj1 (ref->entity graph ref)
+        obj2 (ref->entity graph ref true)]
+    (is (= data obj1))
+    (is (= (assoc data :sub (dissoc d0 :db/ident)) obj2))))
 
 (deftest test-ident-map->triples
   (with-fresh-gen

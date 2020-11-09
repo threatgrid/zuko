@@ -69,6 +69,8 @@
   (let [l (build-list graph seen pairs)]
     (if (seq? l) (vec l) l)))
 
+(def ^:dynamic *nested-structs* false)
+
 (s/defn recurse-node :- s/Any
   "Determines if the val of a map entry is a node to be recursed on, and loads if necessary.
   If referring directly to a top level node, then short circuit and return the ID"
@@ -76,7 +78,7 @@
    seen :- #{s/Keyword}
    [prop v :as prop-val] :- KeyValue]
   (if-let [pairs (check-structure graph prop v)]
-    (if (some #(= :tg/entity (first %)) pairs)
+    (if (and (not *nested-structs*) (some #(= :tg/entity (first %)) pairs))
       [prop (if-let [ident (some (fn [[k v]] (if (= :db/ident k) v)) pairs)]
               {:db/ident ident}
               {:db/id v})]
@@ -130,37 +132,51 @@
    Accepts a value that identifies the internal node."
   ([graph :- GraphType
     entity-id :- s/Any]
-   (ref->entity graph entity-id nil))
+   (ref->entity graph entity-id false nil))
   ([graph :- GraphType
     entity-id :- s/Any
+    nested? :- s/Bool]
+   (ref->entity graph entity-id nested? nil))
+  ([graph :- GraphType
+    entity-id :- s/Any
+    nested? :- s/Bool
     exclusions :- (s/maybe #{(s/cond-pre s/Keyword s/Str)})]
-   (let [prop-vals (property-values graph entity-id)
-         pvs (if (seq exclusions)
-               (remove (comp exclusions first) prop-vals)
-               prop-vals)]
-     (pairs->struct graph pvs))))
+   (binding [*nested-structs* nested?]
+     (let [prop-vals (property-values graph entity-id)
+           pvs (if (seq exclusions)
+                 (remove (comp exclusions first) prop-vals)
+                 prop-vals)]
+       (pairs->struct graph pvs)))))
 
 
 (s/defn ident->entity :- EntityMap
   "Converts data in a database to a data structure suitable for JSON encoding
    Accepts an internal node identifier to identify the entity object"
-  [graph :- GraphType
-   ident :- s/Any]
-  ;; find the entity by its ident. Some systems will make the id the entity id,
-  ;; and the ident will be separate, so look for both.
-  (let [eid (or (ffirst (node/find-triple graph [ident '?a '?v]))
-                (ffirst (node/find-triple graph ['?eid :db/ident ident])))]
-    (ref->entity graph eid)))
+  ([graph :- GraphType
+    ident :- s/Any]
+   (ident->entity graph ident false))
+  ([graph :- GraphType
+    ident :- s/Any
+    nested? :- s/Bool]
+   ;; find the entity by its ident. Some systems will make the id the entity id,
+   ;; and the ident will be separate, so look for both.
+   (let [eid (or (ffirst (node/find-triple graph [ident '?a '?v]))
+                 (ffirst (node/find-triple graph ['?eid :db/ident ident])))]
+     (ref->entity graph eid nested?))))
 
 (s/defn graph->entities :- [EntityMap]
   "Pulls all top level entities out of a store"
   ([graph :- GraphType]
-   (graph->entities graph nil))
+   (graph->entities graph false nil))
   ([graph :- GraphType
+    nested? :- s/Bool]
+   (graph->entities graph nested? nil))
+  ([graph :- GraphType
+    nested? :- s/Bool
     exclusions :- (s/maybe #{s/Keyword})]
    (->> (node/find-triple graph '[?e :tg/entity true])
         (map first)
-        (map #(ref->entity graph % exclusions)))))
+        (map #(ref->entity graph % nested? exclusions)))))
 
 #?(:clj
    (defn json-generate-string
@@ -180,6 +196,8 @@
 (s/defn graph->str :- s/Str
   "Reads a store into JSON strings"
   ([graph :- GraphType]
-   (json-generate-string (graph->entities graph)))
-  ([graph :- GraphType, indent :- s/Num]
-   (json-generate-string (graph->entities graph) indent)))
+   (json-generate-string (graph->entities graph false)))
+  ([graph :- GraphType, nested? :- s/Bool]
+   (json-generate-string (graph->entities graph nested?)))
+  ([graph :- GraphType, nested? :- s/Bool, indent :- s/Num]
+   (json-generate-string (graph->entities graph nested?) indent)))
