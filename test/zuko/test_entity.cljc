@@ -86,7 +86,7 @@
              [:test/n2 :tg/contains :test/n7]} m5))))
 
 (defn entities->graph [coll]
-  (set (enitities->triples (test-helper/new-graph) coll)))
+  (set (entities->triples (test-helper/new-graph) coll)))
 
 (deftest test-encode
   (let [m1 (entities->graph [{:prop "val"}])
@@ -242,9 +242,11 @@
     (is (= data obj1))
     (is (= (assoc data :sub (dissoc d0 :db/ident)) obj2))))
 
-(defn ident-map->graph [m]
-  (let [[triples mp] (ident-map->triples empty-graph m)]
-    [(set triples) mp]))
+(defn ident-map->graph
+  ([m] (ident-map->graph m {}))
+  ([m mp]
+   (let [[triples result-map] (ident-map->triples empty-graph m mp)]
+     [(set triples) result-map])))
 
 (deftest test-ident-map->triples
   (with-fresh-gen
@@ -281,11 +283,11 @@
                [node1 :attribute 2]}
              triples1))
       (is (empty? map2))
-      (is = #{[node1 :db/ident node1]
-              [node1 :tg/entity true]
-              [node1 :prop "value"]
-              [node1 :attribute 2]}
-          triples2)
+      (is (= #{[node1 :db/ident node1]
+               [node1 :tg/entity true]
+               [node1 :prop "value"]
+               [node1 :attribute 2]}
+             triples2))
       (is (= #{[node2 :db/ident node2]
                [node2 :tg/entity true]
                [node2 :prop "value"]
