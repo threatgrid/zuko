@@ -40,7 +40,7 @@
 (declare value-triples map->triples)
 
 (defn list-triples
-  "Creates the triples for a list.Returns a node and list of nodes representing contents of the list."
+  "Creates the triples for a list. Returns a node and list of nodes representing contents of the list."
   [[v & vs :as vlist]]
   (if (seq vlist)
     (let [node-ref (node/new-node *current-graph*)
