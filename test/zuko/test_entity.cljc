@@ -28,124 +28,118 @@
   [graph data]
   (graph-transact graph 0 nil data))
 
+(defn string->graph-set [s]
+  (set (string->triples (test-helper/new-graph) s)))
 
 (deftest test-encode-from-string
-  (let [m1 (string->triples (test-helper/new-graph)
-                            "[{\"prop\": \"val\"}]")
-        m2 (string->triples (test-helper/new-graph)
-                            "[{\"prop\": \"val\", \"p2\": 2}]")
-        m3 (string->triples (test-helper/new-graph)
-                            (str "[{\"prop\": \"val\","
-                                 "  \"p2\": 22,"
-                                 "  \"p3\": [42, 54]}]"))
-        m4 (string->triples (test-helper/new-graph)
-                            (str "[{\"prop\": \"val\"},"
-                                 " {\"prop\": \"val2\"}]"))
-        m5 (string->triples (test-helper/new-graph)
-                            (str "[{\"prop\": \"val\","
-                                 "  \"arr\": ["
-                                 "    {\"a\": 1},"
-                                 "    {\"a\": 2},"
-                                 "    [\"nested\"]"
-                                 "]}]"))]
-    (is (= [[:test/n1 :db/ident :test/n1]
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]] m1))
-    (is (= [[:test/n1 :db/ident :test/n1]
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :p2 2]] m2))
-    (is (= [[:test/n1 :db/ident :test/n1] 
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :p2 22]
-            [:test/n1 :p3 :test/n2]
-            [:test/n2 :tg/first 42]
-            [:test/n2 :tg/rest :test/n3]
-            [:test/n3 :tg/first 54]
-            [:test/n2 :tg/contains 42]
-            [:test/n2 :tg/contains 54]] m3))
-    (is (= [[:test/n1 :db/ident :test/n1]
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n2 :db/ident :test/n2]
-            [:test/n2 :tg/entity true]
-            [:test/n2 :prop "val2"]] m4))
-    (is (= [[:test/n1 :db/ident :test/n1]
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :arr :test/n2]
-            [:test/n2 :tg/first :test/n3]
-            [:test/n2 :tg/rest :test/n4]
-            [:test/n3 :a 1]
-            [:test/n4 :tg/first :test/n5]
-            [:test/n4 :tg/rest :test/n6]
-            [:test/n5 :a 2]
-            [:test/n6 :tg/first :test/n7]
-            [:test/n7 :tg/first "nested"]
-            [:test/n7 :tg/contains "nested"]
-            [:test/n2 :tg/contains :test/n3]
-            [:test/n2 :tg/contains :test/n5]
-            [:test/n2 :tg/contains :test/n7]] m5))))
+  (let [m1 (string->graph-set "[{\"prop\": \"val\"}]")
+        m2 (string->graph-set "[{\"prop\": \"val\", \"p2\": 2}]")
+        m3 (string->graph-set (str "[{\"prop\": \"val\","
+                                   "  \"p2\": 22,"
+                                   "  \"p3\": [42, 54]}]"))
+        m4 (string->graph-set (str "[{\"prop\": \"val\"},"
+                                   " {\"prop\": \"val2\"}]"))
+        m5 (string->graph-set (str "[{\"prop\": \"val\","
+                                   "  \"arr\": ["
+                                   "    {\"a\": 1},"
+                                   "    {\"a\": 2},"
+                                   "    [\"nested\"]"
+                                   "]}]"))]
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]} m1))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :p2 2]} m2))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :p2 22]
+             [:test/n1 :p3 :test/n2]
+             [:test/n2 :tg/first 42]
+             [:test/n2 :tg/rest :test/n3]
+             [:test/n3 :tg/first 54]
+             [:test/n2 :tg/contains 42]
+             [:test/n2 :tg/contains 54]} m3))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n2 :db/ident :test/n2]
+             [:test/n2 :tg/entity true]
+             [:test/n2 :prop "val2"]} m4))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :arr :test/n2]
+             [:test/n2 :tg/first :test/n3]
+             [:test/n2 :tg/rest :test/n4]
+             [:test/n3 :a 1]
+             [:test/n4 :tg/first :test/n5]
+             [:test/n4 :tg/rest :test/n6]
+             [:test/n5 :a 2]
+             [:test/n6 :tg/first :test/n7]
+             [:test/n7 :tg/first "nested"]
+             [:test/n7 :tg/contains "nested"]
+             [:test/n2 :tg/contains :test/n3]
+             [:test/n2 :tg/contains :test/n5]
+             [:test/n2 :tg/contains :test/n7]} m5))))
+
+(defn entities->graph [coll]
+  (set (entities->triples (test-helper/new-graph) coll)))
 
 (deftest test-encode
-  (let [m1 (entities->triples (test-helper/new-graph)
-                          [{:prop "val"}])
-        m2 (entities->triples (test-helper/new-graph)
-                          [{:prop "val", :p2 2}])
-        m3 (entities->triples (test-helper/new-graph)
-                          [{:prop "val", :p2 22, :p3 [42 54]}])
-        m4 (entities->triples (test-helper/new-graph)
-                          [{:prop "val"} {:prop "val2"}])
-        m5 (entities->triples (test-helper/new-graph)
-                          [{:prop "val"
-                            :arr [{:a 1} {:a 2} ["nested"]]}])
-        m6 (entities->triples (test-helper/new-graph)
-                          [{:prop "val", :p2 22, :p3 []}])]
-    (is (= [[:test/n1 :db/ident :test/n1]
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]] m1))
-    (is (= [[:test/n1 :db/ident :test/n1]
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :p2 2]] m2))
-    (is (= [[:test/n1 :db/ident :test/n1] 
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :p2 22]
-            [:test/n1 :p3 :test/n2]
-            [:test/n2 :tg/first 42]
-            [:test/n2 :tg/rest :test/n3]
-            [:test/n3 :tg/first 54]
-            [:test/n2 :tg/contains 42]
-            [:test/n2 :tg/contains 54]] m3))
-    (is (= [[:test/n1 :db/ident :test/n1] 
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n2 :db/ident :test/n2] 
-            [:test/n2 :tg/entity true]
-            [:test/n2 :prop "val2"]] m4))
-    (is (= [[:test/n1 :db/ident :test/n1] 
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :arr :test/n2]
-            [:test/n2 :tg/first :test/n3]
-            [:test/n2 :tg/rest :test/n4]
-            [:test/n3 :a 1]
-            [:test/n4 :tg/first :test/n5]
-            [:test/n4 :tg/rest :test/n6]
-            [:test/n5 :a 2]
-            [:test/n6 :tg/first :test/n7]
-            [:test/n7 :tg/first "nested"]
-            [:test/n7 :tg/contains "nested"]
-            [:test/n2 :tg/contains :test/n3]
-            [:test/n2 :tg/contains :test/n5]
-            [:test/n2 :tg/contains :test/n7]] m5))
-    (is (= [[:test/n1 :db/ident :test/n1] 
-            [:test/n1 :tg/entity true]
-            [:test/n1 :prop "val"]
-            [:test/n1 :p2 22]
-            [:test/n1 :p3 :tg/empty-list]] m6))))
+  (let [m1 (entities->graph [{:prop "val"}])
+        m2 (entities->graph [{:prop "val", :p2 2}])
+        m3 (entities->graph [{:prop "val", :p2 22, :p3 [42 54]}])
+        m4 (entities->graph [{:prop "val"} {:prop "val2"}])
+        m5 (entities->graph [{:prop "val"
+                              :arr [{:a 1} {:a 2} ["nested"]]}])
+        m6 (entities->graph [{:prop "val", :p2 22, :p3 []}])]
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]} m1))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :p2 2]} m2))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :p2 22]
+             [:test/n1 :p3 :test/n2]
+             [:test/n2 :tg/first 42]
+             [:test/n2 :tg/rest :test/n3]
+             [:test/n3 :tg/first 54]
+             [:test/n2 :tg/contains 42]
+             [:test/n2 :tg/contains 54]} m3))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n2 :db/ident :test/n2]
+             [:test/n2 :tg/entity true]
+             [:test/n2 :prop "val2"]} m4))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :arr :test/n2]
+             [:test/n2 :tg/first :test/n3]
+             [:test/n2 :tg/rest :test/n4]
+             [:test/n3 :a 1]
+             [:test/n4 :tg/first :test/n5]
+             [:test/n4 :tg/rest :test/n6]
+             [:test/n5 :a 2]
+             [:test/n6 :tg/first :test/n7]
+             [:test/n7 :tg/first "nested"]
+             [:test/n7 :tg/contains "nested"]
+             [:test/n2 :tg/contains :test/n3]
+             [:test/n2 :tg/contains :test/n5]
+             [:test/n2 :tg/contains :test/n7]} m5))
+    (is (= #{[:test/n1 :db/ident :test/n1]
+             [:test/n1 :tg/entity true]
+             [:test/n1 :prop "val"]
+             [:test/n1 :p2 22]
+             [:test/n1 :p3 :tg/empty-list]} m6))))
 
 (defn round-trip
   [data]
@@ -248,94 +242,100 @@
     (is (= data obj1))
     (is (= (assoc data :sub (dissoc d0 :db/ident)) obj2))))
 
+(defn ident-map->graph
+  ([m] (ident-map->graph m {}))
+  ([m mp]
+   (let [[triples result-map] (ident-map->triples empty-graph m mp)]
+     [(set triples) result-map])))
+
 (deftest test-ident-map->triples
   (with-fresh-gen
     (let [data {:id "1234" :prop "value" :attribute 2}
-          [triples1 map1] (ident-map->triples empty-graph data)
+          [triples1 map1] (ident-map->graph data)
           node1 (ffirst map1)
           data2 {:db/id node1 :prop "value" :attribute 2}
-          [triples2 map2] (ident-map->triples empty-graph data2)
+          [triples2 map2] (ident-map->graph data2)
           data3 {:db/id -1 :prop "value" :attribute 2}
-          [triples3 map3] (ident-map->triples empty-graph data3)
+          [triples3 map3] (ident-map->graph data3)
           node2 (get map3 -1)
           data4 {:db/id -1 :prop "value" :attribute 2}
-          [triples4 map4] (ident-map->triples empty-graph data4 {-1 :tg/node-101})
+          [triples4 map4] (ident-map->graph data4 {-1 :tg/node-101})
           data5 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
-          [triples5 map5] (ident-map->triples empty-graph data5)
+          [triples5 map5] (ident-map->graph data5)
           node3 (get map5 -1)
           data6 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
-          [triples6 map6] (ident-map->triples empty-graph data6 {-1 :tg/node-101})
+          [triples6 map6] (ident-map->graph data6 {-1 :tg/node-101})
           data7 {:db/id -1 :prop "value" :sub {:db/id -2} :elts [{:name "one"} {:db/id -2 :name "two"}]}
-          [triples7 map7] (ident-map->triples empty-graph data7)
+          [triples7 map7] (ident-map->graph data7)
           node4 (get map7 -1)
           node5 (get map7 -2)
           node6 (->> triples7 (filter #(= :elts (second %))) first last)
           node7 (-> map7 (dissoc -1) (dissoc -2) ffirst)
           node8 (->> triples7 (filter #(= :tg/rest (second %))) first last)
           data8 {:db/id -1 :prop #{"value1" "value2"} :attribute 2}
-          [triples8 map8] (ident-map->triples empty-graph data8)
+          [triples8 map8] (ident-map->graph data8)
           node9 (get map8 -1)]
       (is (= {node1 node1} map1))
-      (is (= [[node1 :db/ident node1]
-              [node1 :tg/entity true]
-              [node1 :id "1234"]
-              [node1 :prop "value"]
-              [node1 :attribute 2]]
+      (is (= #{[node1 :db/ident node1]
+               [node1 :tg/entity true]
+               [node1 :id "1234"]
+               [node1 :prop "value"]
+               [node1 :attribute 2]}
              triples1))
       (is (empty? map2))
-      (is (= [[node1 :db/ident node1]
-              [node1 :tg/entity true]
-              [node1 :prop "value"]
-              [node1 :attribute 2]]
+      (is (= #{[node1 :db/ident node1]
+               [node1 :tg/entity true]
+               [node1 :prop "value"]
+               [node1 :attribute 2]}
              triples2))
-      (is (= [[node2 :db/ident node2]
-              [node2 :tg/entity true]
-              [node2 :prop "value"]
-              [node2 :attribute 2]]
+      (is (= #{[node2 :db/ident node2]
+               [node2 :tg/entity true]
+               [node2 :prop "value"]
+               [node2 :attribute 2]}
              triples3))
       (is (= {-1 :tg/node-101} map4))
-      (is (= [[:tg/node-101 :db/ident :tg/node-101]
-              [:tg/node-101 :tg/entity true]
-              [:tg/node-101 :prop "value"]
-              [:tg/node-101 :attribute 2]]
+      (is (= #{[:tg/node-101 :db/ident :tg/node-101]
+               [:tg/node-101 :tg/entity true]
+               [:tg/node-101 :prop "value"]
+               [:tg/node-101 :attribute 2]}
              triples4))
       (is (= {-1 node3} map5))
-      (is (= [[node3 :db/ident node3]
-              [node3 :tg/entity true]
-              [node3 :prop "value"]
-              [node3 :attribute 2]
-              [node3 :sub node3]]
+      (is (= #{[node3 :db/ident node3]
+               [node3 :tg/entity true]
+               [node3 :prop "value"]
+               [node3 :attribute 2]
+               [node3 :sub node3]}
              triples5))
       (is (= {-1 :tg/node-101} map6))
-      (is (= [[:tg/node-101 :db/ident :tg/node-101]
-              [:tg/node-101 :tg/entity true]
-              [:tg/node-101 :prop "value"]
-              [:tg/node-101 :attribute 2]
-              [:tg/node-101 :sub :tg/node-101]]
+      (is (= #{[:tg/node-101 :db/ident :tg/node-101]
+               [:tg/node-101 :tg/entity true]
+               [:tg/node-101 :prop "value"]
+               [:tg/node-101 :attribute 2]
+               [:tg/node-101 :sub :tg/node-101]}
              triples6))
       (is (= {-1 node4 -2 node5 node7 node7} map7))
-      (is (= [[node4 :db/ident node4]
-              [node4 :tg/entity true]
-              [node4 :prop "value"]
-              [node4 :sub node5]
-              [node4 :elts node6]
-              [node6 :tg/first node7]
-              [node6 :tg/rest node8]
-              [node7 :name "one"]
-              [node8 :tg/first node5]
-              [node5 :name "two"]
-              [node6 :tg/contains node7]
-              [node6 :tg/contains node5]]
+      (is (= #{[node4 :db/ident node4]
+               [node4 :tg/entity true]
+               [node4 :prop "value"]
+               [node4 :sub node5]
+               [node4 :elts node6]
+               [node6 :tg/first node7]
+               [node6 :tg/rest node8]
+               [node7 :name "one"]
+               [node8 :tg/first node5]
+               [node5 :name "two"]
+               [node6 :tg/contains node7]
+               [node6 :tg/contains node5]}
              triples7))
-      (is (= [[node9 :db/ident node9]
-              [node9 :tg/entity true]
-              [node9 :prop "value1"]
-              [node9 :prop "value2"]
-              [node9 :attribute 2]]
+      (is (= #{[node9 :db/ident node9]
+               [node9 :tg/entity true]
+               [node9 :prop "value1"]
+               [node9 :prop "value2"]
+               [node9 :attribute 2]}
              triples8))
       )))
 
-#?(:clj 
+#?(:clj
 (deftest test-multi-update
   (let [graph
         #asami.multi_graph.MultiGraph{:spo #:tg{:node-27367

@@ -31,79 +31,59 @@
 
 (def ^:dynamic *id-map* nil)
 
+(def ^:dynamic *triples* nil)
+
 (def Triple [(s/one s/Any "Entity")
              (s/one s/Keyword "attribute")
              (s/one s/Any "value")])
 
-(def EntityTriplesPair [(s/one s/Any "node ID")
-                        (s/one [Triple] "current list of triples")])
-
-(s/defn containership-triples
-  "Finds the list of entity nodes referred to in a list and builds
-   triples describing a flat 'contains' property"
-  [node :- s/Any
-   triples :- [Triple]]
-  (let [listmap (->> (group-by first triples)
-                     (map (fn [[k vs]]
-                            [k (into {} (map #(apply vector (rest %)) vs))]))
-                     (into {}))
-        node-list (loop [nl [] n node]
-                    (if-not n
-                      nl
-                      (let [{r :tg/rest :as lm} (listmap n)
-                            [_ f] (reader/get-tg-first lm)]
-                        (recur (conj nl f) r))))]
-    (doall  ;; uses a dynamically bound value, so ensure that this is executed
-      (map
-       (fn [n] [node (node/container-attribute *current-graph* n) n])
-       node-list))))
-
 (declare value-triples map->triples)
 
-(s/defn list-triples
-  "Creates the triples for a list"
+(defn list-triples
+  "Creates the triples for a list. Returns a node and list of nodes representing contents of the list."
   [[v & vs :as vlist]]
   (if (seq vlist)
     (let [node-ref (node/new-node *current-graph*)
-          [value-ref triples] (value-triples v)
-          [next-ref next-triples] (list-triples vs)]
-      [node-ref (concat [[node-ref (node/data-attribute *current-graph* value-ref) value-ref]]
-                        (when next-ref [[node-ref :tg/rest next-ref]])
-                        triples
-                        next-triples)])))
+          value-ref (value-triples v)
+          [next-ref value-nodes] (list-triples vs)]
+      (vswap! *triples* conj [node-ref (node/data-attribute *current-graph* value-ref) value-ref])
+      (when next-ref
+        (vswap! *triples* conj [node-ref :tg/rest next-ref]))
+      [node-ref (cons value-ref value-nodes)])))
 
-(s/defn value-triples-list :- EntityTriplesPair
+(s/defn value-triples-list
   [vlist :- [s/Any]]
   (if (seq vlist)
-    (let [[node triples :as raw-result] (list-triples vlist)]
-      (if triples
-        [node (concat triples (containership-triples node triples))]
-        raw-result))
-    [:tg/empty-list nil]))
+    (let [[node value-nodes] (list-triples vlist)]
+      (doseq [vn value-nodes]
+        (vswap! *triples* conj [node (node/container-attribute *current-graph* vn) vn]))
+      node)
+    :tg/empty-list))
 
-(s/defn value-triples
+(defn value-triples
   "Converts a value into a list of triples.
-   Return the entity ID of the data coupled with the sequence of triples."
+   Return the entity ID of the data."
   [v]
   (cond
     (sequential? v) (value-triples-list v)
     (set? v) (value-triples-list (seq v))
     (map? v) (map->triples v)
-    (nil? v) [:tg/nil nil]
-    :default [v nil]))
+    (nil? v) :tg/nil
+    :default v))
 
-(s/defn property-vals :- [Triple]
+(s/defn property-vals
   "Takes a property-value pair associated with an entity,
    and builds triples around it"
   [entity-ref :- s/Any
    [property value] :- KeyValue]
   (if (set? value)
-    (mapcat #(if-let [[vr vd] (value-triples %)]
-               (cons [entity-ref property vr] vd)) (seq value))
-    (if-let [[value-ref value-data] (value-triples value)]
-      (cons [entity-ref property value-ref] value-data))))
+    (doseq [v value]
+      (let [vr (value-triples v)]
+        (vswap! *triples* conj [entity-ref property vr])))
+    (let [v (value-triples value)]
+      (vswap! *triples* conj [entity-ref property v]))))
 
-(s/defn new-node
+(defn new-node
   [id]
   (let [next-id (node/new-node *current-graph*)]
     (vswap! *id-map* assoc (or id next-id) next-id)
@@ -133,26 +113,26 @@
       :default [(new-node nil) false])))  ;; generate a new ref
 
 
-(s/defn map->triples :- EntityTriplesPair
-  "Converts a single map to triples. Returns a pair of the map's ID and the triples for the map."
+(s/defn map->triples
+  "Converts a single map to triples. Returns the entity reference or node id."
   [data :- {s/Keyword s/Any}]
   (let [[entity-ref ident?] (get-ref data)
         data (dissoc data :db/id)
         data (if ident? (dissoc data :db/ident) data)]
-    [entity-ref (if (seq data)
-                  (doall (mapcat (partial property-vals entity-ref) data)))]))
+    (doseq [d data]
+      (property-vals entity-ref d))
+    entity-ref))
 
 
-(s/defn name-for
+(defn name-for
   "Convert an id (probably a number) to a keyword for identification"
-  [id :- s/Any]
+  [id]
   (if (keyword? id)
     id
     (node/node-label *current-graph* id)))
 
 
-(s/defn ident-map->triples :- [(s/one [Triple] "The triples representing the ident-map")
-                               (s/one {s/Any s/Any} "The map of IDs in ident-maps to the actual IDs in the triples")]
+(s/defn ident-map->triples
   "Converts a single map to triples for an ID'ed map"
   ([graph :- GraphType
     j :- EntityMap]
@@ -161,15 +141,16 @@
     j :- EntityMap
     id-map :- {s/Any s/Any}]
    (binding [*current-graph* graph
-             *id-map* (volatile! id-map)]
-     (ident-map->triples j)))
+             *id-map* (volatile! id-map)
+             *triples* (volatile! [])]
+     (ident-map->triples j)
+     [@*triples* @*id-map*]))
   ([j :- EntityMap]
-   (let [[node-ref triples] (map->triples j)]
-     [(doall
-       (if (:db/ident j)
-         (cons [node-ref :tg/entity true] triples)
-         (concat [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]] triples)))
-      @*id-map*])))
+   (let [node-ref (map->triples j)]
+     (if (:db/ident j)
+       (vswap! *triples* conj [node-ref :tg/entity true])
+       (vswap! *triples* into [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]]))
+     @*id-map*)))
 
 
 (s/defn entities->triples :- [Triple]
@@ -181,9 +162,11 @@
     entities :- [EntityMap]
     id-map :- {s/Any s/Any}]
    (binding [*current-graph* graph
-             *id-map* (volatile! id-map)]
-     (let [triples-ids (map ident-map->triples entities)]
-       (doall (mapcat first triples-ids))))))  ;; drop the id maps
+             *id-map* (volatile! id-map)
+             *triples* (volatile! [])]
+     (doseq [e entities]
+       (ident-map->triples e))
+     @*triples*)))
 
 
 #?(:clj
@@ -194,7 +177,7 @@
       (with-open [r (io/reader io)]
         (let [data (j/parse-stream r true)]
           (entities->triples graph data))))
-    
+
    :cljs
     (s/defn stream->triples :- [Triple]
       [graph io]
@@ -231,5 +214,7 @@
           triples-to-remove (mapcat (partial existing-triples graph node-ref) pvs-to-remove)
 
           to-add (remove (fn [[k v]] (when-let [new-val (get old-node k)] (= new-val v))) entity)
-          triples-to-add (doall (mapcat (partial property-vals node-ref) to-add))]
+          triples-to-add (binding [*triples* (volatile! [])]
+                           (doseq [pvs to-add] (property-vals node-ref pvs))
+                           @*triples*)]
       [triples-to-add triples-to-remove])))
