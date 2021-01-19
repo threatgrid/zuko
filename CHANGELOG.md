@@ -4,6 +4,11 @@
 ### Changed
 
 
+## [0.3.4] - 2021-01-19
+### Added
+- Updated Results to allow for symbols.
+
+
 ## [0.3.3] - 2020-12-14
 ### Added
 - Changed entity conversion to triples to use fewer resources.
@@ -55,7 +60,8 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.3.3...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.3.4...HEAD
+[0.3.4]: https://github.com/threatgrid/zuko/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/threatgrid/zuko/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/threatgrid/zuko/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/threatgrid/zuko/compare/0.3.0...0.3.1

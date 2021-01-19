@@ -19,7 +19,7 @@ Include a dependency to this library.
 In Leiningen:
 
 ```clojure
-[org.clojars.quoll/zuko "0.3.3"]
+[org.clojars.quoll/zuko "0.3.4"]
 ```
 
 In `deps.edn`:
@@ -27,7 +27,7 @@ In `deps.edn`:
 ```clojure
 {
   :deps {
-    org.clojars.quoll/zuko {:mvn/version "0.3.3"}
+    org.clojars.quoll/zuko {:mvn/version "0.3.4"}
   }
 }
 ```
@@ -35,7 +35,7 @@ In `deps.edn`:
 
 ## License
 
-Copyright © 2020 Cisco Systems
+Copyright © 2020-2021 Cisco Systems
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
