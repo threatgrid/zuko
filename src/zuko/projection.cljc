@@ -116,6 +116,27 @@
          (filter identity)
          (into var-positions))))
 
+(s/defn dedupe-by :- Results
+  "Removes duplicate rows, only considering the columns of the specified data for projection.
+  This means the column keys for which the values are non-negative."
+  [pattern->data :- {s/Num s/Num}
+   data :- Results]
+  (let [cols (filter #(>= % 0) (vals pattern->data))
+        row-data (fn [r] (mapv (partial nth r) cols))
+        td (fn [rf]
+             (let [pvs (volatile! #{})]
+               (fn
+                 ([] (rf))
+                 ([result] (rf result))
+                 ([result input]
+                  (let [row (row-data input)]
+                    (if (@pvs row)
+                      result
+                      (do
+                        (vswap! pvs conj row)
+                        (rf result input))))))))]
+    (sequence td data)))
+
 (s/defn new-nodes :- [s/Num]
   "Returns all the new node references that appears in a map of offsets.
    Node references are negative numbers."
@@ -236,6 +257,7 @@
          pattern->data (offset-mappings full-pattern columns data)
          nodes (new-nodes pattern->data)]
      (->> data
+          (dedupe-by pattern->data)
           (map #(partition 3 (project-row store-fns full-pattern nodes pattern->data %)))
           (remove (partial group-exists? resolve-pattern))
           (apply concat)
