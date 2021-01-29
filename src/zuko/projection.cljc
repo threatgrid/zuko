@@ -27,7 +27,7 @@
     EntityPattern
     EntityPropertyPattern))
 
-(def Value (s/pred (complement symbol?) "Value"))
+(def Value s/Any)
 
 (def Results [[Value]])
 

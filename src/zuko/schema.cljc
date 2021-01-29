@@ -85,7 +85,7 @@
                  (s/if (comp nil? second) FilterPattern EvalPattern)
                  EPVPattern)))
 
-(def Value (s/pred (complement symbol?) "Value"))
+(def Value s/Any)
 
 (def Results [[Value]])
 
