@@ -1,7 +1,8 @@
 # Change Log
 
 ## [Unreleased]
-### Changed
+### Fixed
+- Removing duplicates when projecting for new entities
 
 
 ## [0.3.3] - 2020-12-14
