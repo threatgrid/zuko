@@ -1,6 +1,6 @@
 (ns ^{:doc "Logging test"
       :author "Paula Gearon"}
-    zuko.test-logging
+    zuko.test-xlogging
     (:require
      [zuko.logging :as log]
      [zuko.helper-stub]
@@ -98,7 +98,6 @@
            (zuko.helper-stub/test-logger "test")
            (is (empty? @w))
            ;; recompile with it turned on
-           (require '[zuko.helper-stub] :reload-all)
            (let [tl (ev "(fn [] (log/info \"test\"))")]
              (tl "test"))
            (is (= ["INFO: test"] @w)))
