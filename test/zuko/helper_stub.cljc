@@ -1,5 +1,6 @@
 (ns zuko.helper-stub
   (:require [zuko.node :as node]
+            [zuko.logging :as log]
             #?(:clj  [schema.core :as s]
                :cljs [schema.core :as s :include-macros true])))
 
@@ -21,3 +22,7 @@
 (defn new-graph [] (->TestGraph [0] (atom 0)))
 
 (def empty-graph (new-graph))
+
+(defn test-logger
+  [data]
+  (log/info data))
