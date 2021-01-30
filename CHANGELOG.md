@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- Added an internal logging library for use in both clj and cljs
+
 ### Fixed
 - Removing duplicates when projecting for new entities
 
