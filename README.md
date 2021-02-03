@@ -10,6 +10,7 @@ The initial applications using this library are
 This library provides functionality for:
 - Managing data (especially JSON data) in a graph database. Asami describes this in the [wiki entry for Entity Structures](https://github.com/threatgrid/asami/wiki/Entity-Structure).
 - Projecting data into tuples suitable for query results or insertion into a graph database. Generation of this data with Zuko is discussed in [Asami](https://github.com/threatgrid/asami/wiki/Entity-Structure).
+- Logging in Clojure or ClojureScript
 - General utilities to avoid duplicating code between projects.
 
 ## Usage
@@ -19,7 +20,7 @@ Include a dependency to this library.
 In Leiningen:
 
 ```clojure
-[org.clojars.quoll/zuko "0.3.4"]
+[org.clojars.quoll/zuko "0.4.0"]
 ```
 
 In `deps.edn`:
@@ -27,11 +28,109 @@ In `deps.edn`:
 ```clojure
 {
   :deps {
-    org.clojars.quoll/zuko {:mvn/version "0.3.4"}
+    org.clojars.quoll/zuko {:mvn/version "0.4.0"}
   }
 }
 ```
 
+### Logging
+The main general purpose code here is the simple logging facility.
+
+#### Clojure
+By default in Clojure, logging function are disabled, which means that
+using log functions will not create any code.
+This ensures that a code path is unaffacted when logging is turned off.
+The easiest way to ensure that logging is enabled is to set `logging.enabled`
+in the System Properties:
+```
+$ clj -J-Dlogging.enabled=true
+```
+Alternatively, it can be set programatically if you're loading the logging namespace
+dynamically. This may be important to load a namespace that uses logging that you
+don't want to modify:
+
+```clojure
+(System/setProperty "logging.enabled" "true")
+(require '[zuko.logging :as log])
+```
+If you want to ensure logging occurs in your own code, then just enable it:
+```clojure
+(require '[zuko.logging :as log])
+(log/set-enabled! true)
+```
+The "enabled" flag is global across all namespaces.
+
+#### ClojureScript
+By default, ClojureScript logging is enabled. This reflects the fact that
+ClojureScript is typically built and deployed, so it is not usually possible to
+update a flag to modify actual inlined code.
+
+If you want to ensure that logging is excluded from the final output, then ensure that
+your ClojureScript code is compiled with `-Dlogging.enabled=false`
+
+### Usage
+Logging always checks the current logging level before emitting a log. This can be done
+dynamically with a number or using the `set-logging-level!` function, which can take
+a number or a keyword.
+```clojure
+(ns my.program (:require [zuko.logging :as log]))
+
+(log/set-logging-level! :warn)
+(log/error "Something went wrong!")
+(log/info "This does nothing")
+;; temporarily allow through INFO messages
+(binding [log/*level* 4]
+  (log/info "The level was set to:" log/*level*))
+```
+This will output:
+```
+my.program WARN: Something went wrong!
+my.program INFO: The level was set to:4
+```
+#### Numerical levels
+The logging levels are:
+| `:fatal` | 1 |
+| `:error` | 2 |
+| `:warn`  | 3 |
+| `:info`  | 4 |
+| `:debug` | 5 |
+| `:trace` | 6 |
+
+Logging will record any messages that are at the current level or lower. So when level 4
+is set (info), then all `info`, `warn`, `error` and `fatal` messages are recorded.
+
+Bindings must be done by numerical constant, but using `set-logging-level!` can use a number
+or the above keywords.
+
+#### Output
+If no output has been set, then all logging will go to stdout by default (or the console in a web browser).
+
+Output can be set dynamically, or by using the `set-output!` function. Available options are:
+
+- `nil` or `""`: write to standard output or console.
+- Atom: data will be added via `conj`
+- `java.io.Writer`: sent to the writer (Clojure only).
+
+```clojure
+(def output (atom []))
+(log/set-output! output)
+(log/debug "step 1")
+(binding [log/*output* nil]
+  (log/debug "step 2"))
+(log/debug "step 3")
+(deref output)
+```
+This will return:
+```
+["my.program DEBUG: step 1" "my.program DEBUG: step 3"]
+```
+and standard out will show:
+```
+my.program DEBUG: step 2
+```
+
+## TODO
+Considering adding an optional filter for which namespaces should be displayed.
 
 ## License
 

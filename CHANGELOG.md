@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+
+## [0.4.0] - 2021-02-03
 ### Added
 - Added an internal logging library for use in both clj and cljs
 
@@ -11,7 +13,6 @@
 ## [0.3.4] - 2021-01-19
 ### Added
 - Updated Results to allow for symbols.
-
 
 ## [0.3.3] - 2020-12-14
 ### Added
@@ -64,7 +65,8 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.3.4...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/threatgrid/zuko/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/threatgrid/zuko/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/threatgrid/zuko/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/threatgrid/zuko/compare/0.3.1...0.3.2

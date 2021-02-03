@@ -31,5 +31,4 @@
        :dependencies [[org.clojars.quoll/asami "1.2.12"]]}
       }
     :test-commands {
-      "unit" ["node" "out/zuko/test_memory.js"]}
-    })
+      "unit" ["node" "out/zuko/test_memory.js"]}})
