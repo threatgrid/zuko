@@ -89,6 +89,8 @@ my.program INFO: The level was set to:4
 ```
 #### Numerical levels
 The logging levels are:
+| Keyword  | # |
+|----------|---|
 | `:fatal` | 1 |
 | `:error` | 2 |
 | `:warn`  | 3 |
