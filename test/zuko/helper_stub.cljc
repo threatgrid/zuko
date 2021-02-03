@@ -1,6 +1,6 @@
 (ns zuko.helper-stub
   (:require [zuko.node :as node]
-            [zuko.logging :as log]
+            [zuko.logging :as log :refer-macros [info]]
             #?(:clj  [schema.core :as s]
                :cljs [schema.core :as s :include-macros true])))
 
