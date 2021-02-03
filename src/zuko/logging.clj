@@ -96,29 +96,34 @@ and the current binding of *output* will determine where the log will be sent."
   [& args]
   (when *enabled*
     (let [cns (str *ns*)]
-      `(log* *output* :trace ~cns ~@args))))
+      `(when (<= 6 *level*) (log* *output* :trace ~cns ~@args)))))
 
 (defmacro debug
   [& args]
   (when *enabled*
     (let [cns (str *ns*)]
-      `(log* *output* :debug ~cns ~@args))))
+      `(when (<= 5 *level*) (log* *output* :debug ~cns ~@args)))))
 
 (defmacro info
   [& args]
   (when *enabled*
     (let [cns (str *ns*)]
-      `(log* *output* :info ~cns ~@args))))
-
+      `(when (<= 4 *level*) (log* *output* :info ~cns ~@args)))))
 
 (defmacro warn
   [& args]
   (when *enabled*
     (let [cns (str *ns*)]
-      `(log* *output* :warn ~cns ~@args))))
+      `(when (<= 3 *level*) (log* *output* :warn ~cns ~@args)))))
+
+(defmacro error
+  [& args]
+  (when *enabled*
+    (let [cns (str *ns*)]
+      `(when (<= 2 *level*) (log* *output* :error ~cns ~@args)))))
 
 (defmacro fatal
   [& args]
   (when *enabled*
     (let [cns (str *ns*)]
-      `(log* *output* :fatal ~cns ~@args))))
+      `(when (<= 1 *level*) (log* *output* :fatal ~cns ~@args)))))
