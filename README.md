@@ -110,6 +110,7 @@ If no output has been set, then all logging will go to stdout by default (or the
 Output can be set dynamically, or by using the `set-output!` function. Available options are:
 
 - `nil` or `""`: write to standard output or console.
+- "filename": appends to a file. This works in Clojure or ClojureScript on Node.js.
 - Atom: data will be added via `conj`
 - `java.io.Writer`: sent to the writer (Clojure only).
 
