@@ -96,7 +96,7 @@
      (persistent!
       (reduce (fn [m [k v]]
                 (assoc! m k (if-let [[km vm] (find m k)]
-                              (if (set? vm) (conj vm v) #{vm v})
+                              (if (set? vm) (conj vm v) (hash-set vm v))
                               v)))
               (transient {}) kvs))
      :cljs
@@ -104,7 +104,7 @@
       (reduce (fn [m [k v]]
                 (assoc! m k (let [vm (get m k ::null)]
                               (if-not (= ::null vm)
-                                (if (set? vm) (conj vm v) #{vm v})
+                                (if (set? vm) (conj vm v) (hash-set vm v))
                                 v))))
               (transient {}) kvs))))
 
