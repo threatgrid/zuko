@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.4.2] - 2021-02-19
+### Fixed
+- Workaround for the Clojure `#{}` reader macro from disallowing duplicates.
+
+## [0.4.1] - 2021-02-18
+### Changed
+- Removed unnecessary ClojureScript dependencies from artifacts.
+
 ## [0.4.0] - 2021-02-03
 ### Added
 - Added an internal logging library for use in both clj and cljs
@@ -65,7 +73,9 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.2...HEAD
+[0.4.2]: https://github.com/threatgrid/zuko/compare/0.4.1...0.4.2
+[0.4.1]: https://github.com/threatgrid/zuko/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/threatgrid/zuko/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/threatgrid/zuko/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/threatgrid/zuko/compare/0.3.2...0.3.3
