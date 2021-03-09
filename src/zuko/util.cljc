@@ -6,12 +6,15 @@
 
 ;; NOTE: this code avoids cljs.js due to inconsistency in how it gets loaded in standard configurations
 
-#?(:cljs (def known-namespaces {'cljs.core (ns-publics 'cljs.core)
-                                'clojure.core (ns-publics 'cljs.core)
-                                'clojure.string (ns-publics 'clojure.string)
-                                "cljs.core" (ns-publics 'cljs.core)
-                                "clojure.core" (ns-publics 'cljs.core)
-                                "clojure.string" (ns-publics 'clojure.string)}))
+#?(:cljs (def ns-publics-map {'cljs.core (ns-publics 'cljs.core)
+                              'clojure.string (ns-publics 'clojure.string)}))
+
+#?(:cljs (def known-namespaces {'cljs.core (ns-publics-map 'cljs.core)
+                                'clojure.core (ns-publics-map 'cljs.core)
+                                'clojure.string (ns-publics-map 'clojure.string)
+                                "cljs.core" (ns-publics-map 'cljs.core)
+                                "clojure.core" (ns-publics-map 'cljs.core)
+                                "clojure.string" (ns-publics-map 'clojure.string)}))
 
 #?(:clj
    (s/defn get-fn-reference :- (s/maybe Var)
