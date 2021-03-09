@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.4.3] - 2021-03-09
+### Added
+- Whitelist for function resolution.
+
+### Changed
+- Entity structures now check for substructures on anything that is a valid node.
+
 ## [0.4.2] - 2021-02-19
 ### Fixed
 - Workaround for the Clojure `#{}` reader macro from disallowing duplicates.
