@@ -127,7 +127,7 @@
 (defn name-for
   "Convert an id (probably a number) to a keyword for identification"
   [id]
-  (if (keyword? id)
+  (if (or (keyword? id) (node/node-type? *current-graph* :db/id id))
     id
     (node/node-label *current-graph* id)))
 

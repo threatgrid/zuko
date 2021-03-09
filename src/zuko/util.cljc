@@ -1,20 +1,17 @@
 (ns zuko.util
     "The ubiquitous utility namespace that every project seems to have"
     (:require [schema.core :as s :refer [=>]]
-     #?(:cljs [clojure.string]))
+              [zuko.sandbox :as sandbox])
     #?(:clj (:import [clojure.lang Var])))
 
 ;; NOTE: this code avoids cljs.js due to inconsistency in how it gets loaded in standard configurations
 
-#?(:cljs (def ns-publics-map {'cljs.core (ns-publics 'cljs.core)
-                              'clojure.string (ns-publics 'clojure.string)}))
-
-#?(:cljs (def known-namespaces {'cljs.core (ns-publics-map 'cljs.core)
-                                'clojure.core (ns-publics-map 'cljs.core)
-                                'clojure.string (ns-publics-map 'clojure.string)
-                                "cljs.core" (ns-publics-map 'cljs.core)
-                                "clojure.core" (ns-publics-map 'cljs.core)
-                                "clojure.string" (ns-publics-map 'clojure.string)}))
+#?(:cljs (def known-namespaces {'cljs.core sandbox/allowed-map
+                                'clojure.core sandbox/allowed-map
+                                'clojure.string sandbox/allowed-map-str
+                                "cljs.core" sandbox/allowed-map
+                                "clojure.core" sandbox/allowed-map
+                                "clojure.string" sandbox/allowed-map-str}))
 
 #?(:clj
    (s/defn get-fn-reference :- (s/maybe Var)
@@ -47,15 +44,16 @@
      [expr & {:as opts}]
      (throw (ex-info "eval not supported in web environment" {:error "No eval support"}))))
 
-#?(:cljs (def raw-lookup {'= = 'not= not= '< < '> > '<= <= '>= >=}))
 #?(:clj
    (defn fn-for
      "Converts a symbol or string representing an operation into a callable function"
      [op]
-     (or (ns-resolve (the-ns 'clojure.core) op)
-         (throw (ex-info (str "Unable to resolve symbol '" op " in "
-                              (or (namespace op) 'clojure.core))
-                         {:op op :namespace (or (namespace op) "clojure.core")}))))
+     (let [ops (if (symbol? op) op (symbol op))]
+       (or (sandbox/macro-fns ops)
+           (ns-resolve (the-ns 'clojure.core) ops)
+           (throw (ex-info (str "Unable to resolve symbol '" op " in "
+                                (or (namespace ops) 'clojure.core))
+                           {:op op :namespace (or (namespace ops) "clojure.core")})))))
 
    :cljs
    (defn fn-for
@@ -73,7 +71,6 @@
                          {:op op-symbol :namespace ons-str}))))
             (or (resolve-symbol 'clojure.core op-symbol)
                 (resolve-symbol 'cljs.core op-symbol)))
-          (raw-lookup op-symbol)
           (throw (ex-info (str "Unable to resolve symbol '" op-symbol " in "
                                (or (namespace op-symbol) 'cljs.core))
                           {:op op-symbol
