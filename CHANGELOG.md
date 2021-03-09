@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.4] - 2021-03-09
+### Changed
+- Datatype testing with schema now allows various datatypes as entity nodes.
+
 ## [0.4.3] - 2021-03-09
 ### Added
 - Whitelist for function resolution.

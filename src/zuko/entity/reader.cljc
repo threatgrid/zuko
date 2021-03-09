@@ -10,6 +10,8 @@
 
 (def MapOrList (s/cond-pre EntityMap [s/Any]))
 
+(def NodeType s/Any) ;; No checking, but indicates a node in a graph
+
 (defn get-tg-first
   "Finds the tg/first property in a map, and gets the value."
   [struct]
@@ -45,7 +47,7 @@
   "Takes property/value pairs and if they represent a list node, returns the list.
    else, nil."
   [graph :- GraphType
-   seen :- #{s/Any}
+   seen :- #{NodeType}
    pairs :- [KeyValue]]
   ;; convert the data to a map
   (let [st (into {} pairs)]
@@ -64,7 +66,7 @@
 (s/defn vbuild-list :- [s/Any]
   "Calls build-list, converting to a vector as the final step"
   [graph :- GraphType
-   seen :- #{s/Any}
+   seen :- #{NodeType}
    pairs :- [KeyValue]]
   (let [l (build-list graph seen pairs)]
     (if (seq? l) (vec l) l)))
@@ -75,7 +77,7 @@
   "Determines if the val of a map entry is a node to be recursed on, and loads if necessary.
   If referring directly to a top level node, then short circuit and return the ID"
   [graph :- GraphType
-   seen :- #{s/Keyword}
+   seen :- #{NodeType}
    [prop v :as prop-val] :- KeyValue]
   (if-let [pairs (check-structure graph prop v)]
     (if (and (not *nested-structs*) (some #(= :tg/entity (first %)) pairs))
@@ -114,7 +116,7 @@
     prop-vals :- [KeyValue]] (pairs->struct graph prop-vals #{}))
   ([graph :- GraphType
     prop-vals :- [KeyValue]
-    seen :- #{s/Keyword}]
+    seen :- #{NodeType}]
    (if (some (fn [[k _]] (= :tg/first k)) prop-vals)
      (vbuild-list graph seen prop-vals)
      (do
