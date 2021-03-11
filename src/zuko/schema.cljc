@@ -3,9 +3,8 @@
   (:require #?(:clj  [schema.core :as s]
                :cljs [schema.core :as s :include-macros true])))
 
-;; single element in a rule
-(def EntityPropertyElt
-  (s/cond-pre s/Keyword s/Symbol s/Str #?(:clj Long :cljs s/Num)))
+;; single element in a rule. These have extended to be very flexible.
+(def EntityPropertyElt s/Any)
 
 ;; simple pattern containing a single element. e.g. [?v]
 (def EntityPattern [(s/one s/Symbol "entity")])
