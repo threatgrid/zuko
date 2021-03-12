@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.6] - 2021-03-12
+### Added
+- Lookup refs in entity values.
+
 ## [0.4.5] - 2021-03-11
 ### Changed
 - Datatype testing with schema now allows various datatypes throughout query patterns.
@@ -88,7 +92,8 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.5...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.6...HEAD
+[0.4.6]: https://github.com/threatgrid/zuko/compare/0.4.5...0.4.6
 [0.4.5]: https://github.com/threatgrid/zuko/compare/0.4.4...0.4.5
 [0.4.3]: https://github.com/threatgrid/zuko/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/threatgrid/zuko/compare/0.4.2...0.4.3
