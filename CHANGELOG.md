@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.5] - 2021-03-11
+### Changed
+- Datatype testing with schema now allows various datatypes throughout query patterns.
+
 ## [0.4.4] - 2021-03-09
 ### Changed
 - Datatype testing with schema now allows various datatypes as entity nodes.
@@ -84,7 +88,10 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.2...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.5...HEAD
+[0.4.5]: https://github.com/threatgrid/zuko/compare/0.4.4...0.4.5
+[0.4.3]: https://github.com/threatgrid/zuko/compare/0.4.3...0.4.4
+[0.4.3]: https://github.com/threatgrid/zuko/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/threatgrid/zuko/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/threatgrid/zuko/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/threatgrid/zuko/compare/0.3.4...0.4.0
