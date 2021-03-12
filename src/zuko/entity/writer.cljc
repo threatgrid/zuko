@@ -60,11 +60,23 @@
       node)
     :tg/empty-list))
 
+(defn lookup-ref?
+  "Tests if i is a lookup ref"
+  [i]
+  (and (vector? i) (keyword? (first i)) (= 2 (count i))))
+
+(defn resolve-ref
+  [[prop id]]
+  (or (and (= :db/id prop) (get @*id-map* id id))
+      (ffirst (node/find-triple *current-graph* ['?n prop id]))))
+
 (defn value-triples
   "Converts a value into a list of triples.
    Return the entity ID of the data."
   [v]
   (cond
+    (lookup-ref? v) (or (resolve-ref v)
+                        (value-triples-list v))
     (sequential? v) (value-triples-list v)
     (set? v) (value-triples-list (seq v))
     (map? v) (map->triples v)
@@ -95,7 +107,10 @@
   (if-let [r (@*id-map* id)] ;; an ID that is already mapped
     [r false]
     (cond ;; a negative ID is a request for a new saved ID
-      (and (number? id) (neg? id)) [(new-node id) false]
+      (and (number? id) (neg? id)) (let [new-id (new-node id)]
+                                     (when ident
+                                       (vswap! *id-map* assoc ident new-id))
+                                     [new-id false])
       ;; Use the provided ID
       id (if (node/node-type? *current-graph* :db/id id)
            [id false]
@@ -114,13 +129,14 @@
 
 
 (s/defn map->triples
-  "Converts a single map to triples. Returns the entity reference or node id."
+  "Converts a single map to triples. Returns the entity reference or node id.
+   The triples are built up statefully in the volatile *triples*."
   [data :- {s/Keyword s/Any}]
   (let [[entity-ref ident?] (get-ref data)
         data (dissoc data :db/id)
         data (if ident? (dissoc data :db/ident) data)]
     (doseq [d data]
-      (property-vals entity-ref d))
+      (property-vals entity-ref d))  ;; build up result in *triples*
     entity-ref))
 
 
