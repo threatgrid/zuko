@@ -98,7 +98,8 @@
 (defn new-node
   [id]
   (let [next-id (node/new-node *current-graph*)]
-    (vswap! *id-map* assoc (or id next-id) next-id)
+    (when id
+      (vswap! *id-map* assoc (or id next-id) next-id))
     next-id))
 
 (s/defn get-ref

@@ -252,7 +252,7 @@
   (with-fresh-gen
     (let [data {:id "1234" :prop "value" :attribute 2}
           [triples1 map1] (ident-map->graph data)
-          node1 (ffirst map1)
+          node1 (ffirst triples1)
           data2 {:db/id node1 :prop "value" :attribute 2}
           [triples2 map2] (ident-map->graph data2)
           data3 {:db/id -1 :prop "value" :attribute 2}
@@ -270,12 +270,12 @@
           node4 (get map7 -1)
           node5 (get map7 -2)
           node6 (->> triples7 (filter #(= :elts (second %))) first last)
-          node7 (-> map7 (dissoc -1) (dissoc -2) ffirst)
+          node7 (->> triples7 (filter #(and (= :name (second %)) (= "one" (nth % 2)))) ffirst)
           node8 (->> triples7 (filter #(= :tg/rest (second %))) first last)
           data8 {:db/id -1 :prop #{"value1" "value2"} :attribute 2}
           [triples8 map8] (ident-map->graph data8)
           node9 (get map8 -1)]
-      (is (= {node1 node1} map1))
+      (is (empty? map1))
       (is (= #{[node1 :db/ident node1]
                [node1 :tg/entity true]
                [node1 :id "1234"]
@@ -313,7 +313,7 @@
                [:tg/node-101 :attribute 2]
                [:tg/node-101 :sub :tg/node-101]}
              triples6))
-      (is (= {-1 node4 -2 node5 node7 node7} map7))
+      (is (= {-1 node4 -2 node5} map7))
       (is (= #{[node4 :db/ident node4]
                [node4 :tg/entity true]
                [node4 :prop "value"]
