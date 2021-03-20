@@ -15,9 +15,10 @@
   "Finds the tg/first property in a map, and gets the value."
   [struct]
   (let [first-pair? (fn [[k v :as p]]
-                     (and (= tg-ns (namespace k))
-                          (string/starts-with? (name k) "first")
-                          p))]
+                      (and (keyword? k)
+                           (= tg-ns (namespace k))
+                           (string/starts-with? (name k) "first")
+                           p))]
     (some first-pair? struct)))
 
 (s/defn property-values :- [KeyValue]
@@ -25,8 +26,7 @@
    Skips non-keyword properties, as these are not created by tg.entity"
   [graph :- GraphType
    entity :- s/Any]
-  (->> (node/find-triple graph [entity '?p '?o])
-       (filter (comp keyword? first))))
+  (node/find-triple graph [entity '?p '?o]))
 
 
 (s/defn check-structure :- (s/maybe [KeyValue])
@@ -120,7 +120,7 @@
      (vbuild-list graph seen prop-vals)
      (do
        (->> prop-vals
-            (remove (comp #{:db/id :db/ident :tg/entity} first))
+            (remove (comp #{:db/id :db/ident :tg/entity} first))  ;; INTERNAL PROPERTIES
             (remove (comp seen second))
             (map (fn [[a v :as av]] (if (= :tg/nil v) [a nil] av)))
             (map (partial recurse-node graph seen))

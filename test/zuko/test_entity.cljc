@@ -232,7 +232,8 @@
         graph (assert-data graph' [[ref "Connected_To" ref]])
         obj1 (ref->entity graph ref)
         obj2 (ref->entity graph ref false #{"Connected_To"})]
-    (is (= data obj1))
+    (is (= (assoc data "Connected_To" {:db/ident ref})
+           obj1))
     (is (= data obj2))))
 
 (deftest test-nested-ref->entity

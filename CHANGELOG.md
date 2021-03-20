@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2021-03-20
+### Changed
+- Allowing arbitrary keys for entities.
+
 ## [0.5.0] - 2021-03-19
 ### Changed
 - When building entities temp-ids no longer map newly allocated nodes for entities without an id back to themselves.
