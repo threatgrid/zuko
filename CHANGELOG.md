@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-03-19
+### Changed
+- When building entities temp-ids no longer map newly allocated nodes for entities without an id back to themselves.
+
+### Removed
+- No longer reading or writing JSON entities. This should be done outside of Zuko. Affected functions are:
+  * `zuko.entity.reader/graph->str`
+  * `zuko.entity.writer/stream->triples`
+- No more dependency on Cheshire.
+
 ## [0.4.6] - 2021-03-12
 ### Added
 - Lookup refs in entity values.
@@ -92,7 +102,8 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.4.6...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/threatgrid/zuko/compare/0.4.6...0.5.0
 [0.4.6]: https://github.com/threatgrid/zuko/compare/0.4.5...0.4.6
 [0.4.5]: https://github.com/threatgrid/zuko/compare/0.4.4...0.4.5
 [0.4.3]: https://github.com/threatgrid/zuko/compare/0.4.3...0.4.4

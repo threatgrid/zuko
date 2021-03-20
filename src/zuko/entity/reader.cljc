@@ -4,8 +4,7 @@
   (:require [zuko.entity.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
             [zuko.node :as node]
             [schema.core :as s :refer [=>]]
-            [clojure.string :as string]
-            #?(:clj [cheshire.core :as j])))
+            [clojure.string :as string]))
 
 
 (def MapOrList (s/cond-pre EntityMap [s/Any]))
@@ -179,27 +178,3 @@
    (->> (node/find-triple graph '[?e :tg/entity true])
         (map first)
         (map #(ref->entity graph % nested? exclusions)))))
-
-#?(:clj
-   (defn json-generate-string
-     ([data] (j/generate-string data))
-     ([data indent]
-      (j/generate-string
-       data
-       (assoc j/default-pretty-print-options
-              :indentation (apply str (repeat indent \space))))))
-
-   :cljs
-   (defn json-generate-string
-     ([data] (.stringify js/JSON (clj->js data)))
-     ([data indent] (.stringify js/JSON (clj->js data) nil indent))))
-
-
-(s/defn graph->str :- s/Str
-  "Reads a store into JSON strings"
-  ([graph :- GraphType]
-   (json-generate-string (graph->entities graph false)))
-  ([graph :- GraphType, nested? :- s/Bool]
-   (json-generate-string (graph->entities graph nested?)))
-  ([graph :- GraphType, nested? :- s/Bool, indent :- s/Num]
-   (json-generate-string (graph->entities graph nested?) indent)))

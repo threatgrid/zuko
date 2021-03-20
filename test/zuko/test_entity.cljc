@@ -1,5 +1,6 @@
 (ns zuko.test-entity
-  (:require [zuko.entity.writer :refer [string->triples entities->triples entity-update->triples ident-map->triples]]
+  #?(:clj (:refer-clojure :exclude [read-string]))
+  (:require [zuko.entity.writer :refer [entities->triples entity-update->triples ident-map->triples]]
             [zuko.entity.reader :refer [graph->entities ref->entity]]
             [zuko.helper-stub :as test-helper]
             [asami.graph :refer [graph-transact]]
@@ -7,6 +8,8 @@
             [asami.memory :refer [empty-graph]]
             [asami.core :refer [q]]
             [qtest.core :refer [with-fresh-gen]]
+            #?(:clj  [clojure.edn :refer [read-string]]
+               :cljs [cljs.reader :refer [read-string]])
             #?(:clj  [schema.test :as st :refer [deftest]]
                :cljs [schema.test :as st :refer-macros [deftest]])
             #?(:clj  [clojure.test :as t :refer [is]]
@@ -29,20 +32,21 @@
   (graph-transact graph 0 nil data))
 
 (defn string->graph-set [s]
-  (set (string->triples (test-helper/new-graph) s)))
+  (let [d (read-string s)]
+    (set (entities->triples (test-helper/new-graph) d))))
 
 (deftest test-encode-from-string
-  (let [m1 (string->graph-set "[{\"prop\": \"val\"}]")
-        m2 (string->graph-set "[{\"prop\": \"val\", \"p2\": 2}]")
-        m3 (string->graph-set (str "[{\"prop\": \"val\","
-                                   "  \"p2\": 22,"
-                                   "  \"p3\": [42, 54]}]"))
-        m4 (string->graph-set (str "[{\"prop\": \"val\"},"
-                                   " {\"prop\": \"val2\"}]"))
-        m5 (string->graph-set (str "[{\"prop\": \"val\","
-                                   "  \"arr\": ["
-                                   "    {\"a\": 1},"
-                                   "    {\"a\": 2},"
+  (let [m1 (string->graph-set "[{:prop \"val\"}]")
+        m2 (string->graph-set "[{:prop \"val\", :p2 2}]")
+        m3 (string->graph-set (str "[{:prop \"val\","
+                                   "  :p2 22,"
+                                   "  :p3 [42, 54]}]"))
+        m4 (string->graph-set (str "[{:prop \"val\"},"
+                                   " {:prop \"val2\"}]"))
+        m5 (string->graph-set (str "[{:prop \"val\","
+                                   "  :arr ["
+                                   "    {:a 1},"
+                                   "    {:a 2},"
                                    "    [\"nested\"]"
                                    "]}]"))]
     (is (= #{[:test/n1 :db/ident :test/n1]

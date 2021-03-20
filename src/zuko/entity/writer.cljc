@@ -5,27 +5,7 @@
             [zuko.entity.reader :as reader]
             [zuko.node :as node]
             [schema.core :as s :refer [=>]]
-            [clojure.string :as string]
-            #?(:clj [clojure.java.io :as io])
-            #?(:clj [cheshire.core :as j]))
-  #?(:clj (:import [java.util Map List])))
-
-#?(:clj  (def parse-json-string #(j/parse-string % true))
-   :cljs (def parse-json-string #(js->clj (.parse js/JSON %) :keywordize-keys true)))
-
-#?(:clj
-   (defn json-generate-string
-     ([data] (j/generate-string data))
-     ([data indent]
-      (j/generate-string
-       data
-       (assoc j/default-pretty-print-options
-              :indentation (apply str (repeat indent \space))))))
-
-   :cljs
-   (defn json-generate-string
-     ([data] (.stringify js/JSON (clj->js data)))
-     ([data indent] (.stringify js/JSON (clj->js data) nil indent))))
+            [clojure.string :as string]))
 
 (def ^:dynamic *current-graph* nil)
 
@@ -184,27 +164,6 @@
      (doseq [e entities]
        (ident-map->triples e))
      @*triples*)))
-
-
-#?(:clj
-    (s/defn stream->triples :- [Triple]
-      "Converts a stream to triples"
-      [graph :- GraphType
-       io]
-      (with-open [r (io/reader io)]
-        (let [data (j/parse-stream r true)]
-          (entities->triples graph data))))
-
-   :cljs
-    (s/defn stream->triples :- [Triple]
-      [graph io]
-      (throw (ex-info "Unsupported IO" {:io io}))))
-
-(s/defn string->triples :- [Triple]
-  "Converts a string to triples"
-  [graph :- GraphType
-   s :- s/Str]
-  (entities->triples graph (parse-json-string s)))
 
 
 ;; updating the store
