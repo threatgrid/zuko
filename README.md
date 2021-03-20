@@ -132,9 +132,6 @@ and standard out will show:
 my.program DEBUG: step 2
 ```
 
-## TODO
-Considering adding an optional filter for which namespaces should be displayed.
-
 ## License
 
 Copyright © 2020-2021 Cisco Systems
