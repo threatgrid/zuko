@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2021-03-30
+### Added
+- I/O operations.
+
 ## [0.5.1] - 2021-03-20
 ### Changed
 - Allowing arbitrary keys for entities.

@@ -1,4 +1,4 @@
-(defproject org.clojars.quoll/zuko "0.5.1"
+(defproject org.clojars.quoll/zuko "0.6.0"
   :description "Threatgrid library for common graph database functionality"
   :url "https://github.com/threatgrid/zuko"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -11,7 +11,7 @@
     :dev {
       :dependencies [[org.clojure/clojurescript "1.10.773"]
                      [org.clojars.quoll/qtest "0.1.1"]
-                     [org.clojars.quoll/asami "1.2.13"]]}}
+                     [org.clojars.quoll/asami "1.2.16"]]}}
   :cljsbuild {
     :builds {
       :dev

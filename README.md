@@ -132,6 +132,22 @@ and standard out will show:
 my.program DEBUG: step 2
 ```
 
+### I/O
+Zuko provides some simple cross-platform I/O operations.
+
+#### `(spit path data)` and `(slurp path)`
+Writes data to and reads data from a resource identified by `path`. The behavior depends on the platform:
+- On the JVM these are just aliases for `clojure.core/spit` and `clojure.core/slurp`.
+- On Node.js, these operations work the same as the JVM version.
+- In a web browser, data is stored to and retrieved from `localStorage`.
+
+#### `(exists path)`
+Returns `true` when the resource identified by `path` exists.
+`path` typically represents a file path. In a web browser, this indicates a `localStorage` entry.
+
+#### `(rm path)`
+Removes the resource identified by `path`. Returns `true` if the resource existed, or `false`/`nil` otherwise.
+
 ## License
 
 Copyright © 2020-2021 Cisco Systems
