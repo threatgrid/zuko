@@ -13,7 +13,7 @@
        (fn [source]
          (fs.readFileSync source "utf8"))
        (fn [source]
-         (let [s js/Window.localStorage]
+         (let [s (.-localStorage js/window)]
            (.getItem s source))))))
 
 (def spit
@@ -23,7 +23,7 @@
        (fn [dest data]
          (fs.writeFileSync dest data "utf8"))
        (fn [dest data]
-         (let [s js/Window.localStorage]
+         (let [s (.-localStorage js/window)]
            (.setItem s dest data))))))
 
 (def exists
@@ -36,7 +36,7 @@
        (fn [path]
          (fs.existsSync path))
        (fn [path]
-         (let [s js/Window.localStorage]
+         (let [s (.-localStorage js/window)]
            (not (nil? (.getItem s path))))))))
 (def rm
   #?(:clj
@@ -50,7 +50,7 @@
            (fs.unlinkSync path)
            true))
        (fn [path]
-         (let [s js/Window.localStorage]
+         (let [s (.-localStorage js/window)]
            (when (.getItem s path)
              (.removeItem s path)
              true))))))

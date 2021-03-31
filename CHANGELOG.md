@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.6.1] - 2021-03-31
+### Fixed
+- localStore option for i/o.
+
 ## [0.6.0] - 2021-03-30
 ### Added
 - I/O operations.

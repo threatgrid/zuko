@@ -1,4 +1,4 @@
-(defproject org.clojars.quoll/zuko "0.6.1-SNAPSHOT"
+(defproject org.clojars.quoll/zuko "0.6.1"
   :description "Threatgrid library for common graph database functionality"
   :url "https://github.com/threatgrid/zuko"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
