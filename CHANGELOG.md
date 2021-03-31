@@ -111,6 +111,8 @@
 - Extracted from Asami/Naga
 
 [Unreleased]: https://github.com/threatgrid/zuko/compare/0.5.0...HEAD
+[0.6.0]: https://github.com/threatgrid/zuko/compare/0.5.1...0.6.0
+[0.5.1]: https://github.com/threatgrid/zuko/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/threatgrid/zuko/compare/0.4.6...0.5.0
 [0.4.6]: https://github.com/threatgrid/zuko/compare/0.4.5...0.4.6
 [0.4.5]: https://github.com/threatgrid/zuko/compare/0.4.4...0.4.5
