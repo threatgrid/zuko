@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.6.2] - 2021-04-08
+### Changed
+- Updated to ClojureScript 1.10.844
+
+### Fixed
+- Errors in the README
+
 ## [0.6.1] - 2021-03-31
 ### Fixed
 - localStore option for i/o.
@@ -114,7 +121,8 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.6.2...HEAD
+[0.6.2]: https://github.com/threatgrid/zuko/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/threatgrid/zuko/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/threatgrid/zuko/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/threatgrid/zuko/compare/0.5.0...0.5.1
