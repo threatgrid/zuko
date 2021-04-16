@@ -7,11 +7,28 @@
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]))
 
+;; internal generated properties:
+;; :tg/rest List structure
+;; :tg/sub References sub entities
+;; :tg/entity When true, then indicates a top level entity
+
+;; The following 2 attributes may vary according to the database.
+;; e.g. Datomic appends -s -l -d etc to these attributes for different datatypes
+;; Asami uses these names without modification:
+;; :tg/first Indicates a list member by position. Returned by node/data-attribute
+;; :tg/contains Shortcut to list members. Returned by node/container-attribute
+
+;; The following are graph nodes with special meaning:
+;; :tg/emtpty-list A list without entries
+;; :tg/nil a nil value
+
 (def ^:dynamic *current-graph* nil)
 
 (def ^:dynamic *id-map* nil)
 
 (def ^:dynamic *triples* nil)
+
+(def ^:dynamic *current-entity* nil)
 
 (def Triple [(s/one s/Any "Entity")
              (s/one s/Keyword "attribute")
@@ -50,6 +67,13 @@
   (or (and (= :db/id prop) (get @*id-map* id id))
       (ffirst (node/find-triple *current-graph* ['?n prop id]))))
 
+(defn add-subentity-relationship
+  "Adds a sub-entity relationship for a provided node. Returns the node"
+  [node]
+  (when-not (or (= node *current-entity*) (= node :tg/empty-list))
+    (vswap! *triples* conj [*current-entity* :tg/sub node]))
+  node)
+
 (defn value-triples
   "Converts a value into a list of triples.
    Return the entity ID of the data."
@@ -57,9 +81,9 @@
   (cond
     (lookup-ref? v) (or (resolve-ref v)
                         (value-triples-list v))
-    (sequential? v) (value-triples-list v)
+    (sequential? v) (-> (value-triples-list v) add-subentity-relationship)
     (set? v) (value-triples-list (seq v))
-    (map? v) (map->triples v)
+    (map? v) (-> (map->triples v) add-subentity-relationship)
     (nil? v) :tg/nil
     :default v))
 
@@ -116,8 +140,15 @@
   (let [[entity-ref ident?] (get-ref data)
         data (dissoc data :db/id)
         data (if ident? (dissoc data :db/ident) data)]
-    (doseq [d data]
-      (property-vals entity-ref d))  ;; build up result in *triples*
+    ;; build up result in *triples*
+    ;; duplicating the code on both branches of the condition,
+    ;; in order to avoid an unnecessary binding on the stack
+    (if *current-entity*
+      (doseq [d data]
+        (property-vals entity-ref d))
+      (binding [*current-entity* entity-ref]
+        (doseq [d data]
+          (property-vals entity-ref d))))
     entity-ref))
 
 

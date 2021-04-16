@@ -22,11 +22,11 @@
     (some first-pair? struct)))
 
 (s/defn property-values :- [KeyValue]
-  "Return all the property/value pairs for a given entity in the store.
-   Skips non-keyword properties, as these are not created by tg.entity"
+  "Return all the property/value pairs for a given entity in the store. "
   [graph :- GraphType
    entity :- s/Any]
-  (node/find-triple graph [entity '?p '?o]))
+  (->> (node/find-triple graph [entity '?p '?o])
+       (remove #(= :tg/sub (first %)))))
 
 
 (s/defn check-structure :- (s/maybe [KeyValue])

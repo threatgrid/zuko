@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.6.3] - 2021-04-16
+### Added
+- Entity encoding now includes new attributes that connect sub-entities to top-level entities.
+
+### Changed
+- Updated to Naga-store 0.5.3
+
 ## [0.6.2] - 2021-04-08
 ### Changed
 - Updated to ClojureScript 1.10.844
@@ -121,7 +128,8 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.6.2...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.6.3...HEAD
+[0.6.3]: https://github.com/threatgrid/zuko/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/threatgrid/zuko/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/threatgrid/zuko/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/threatgrid/zuko/compare/0.5.1...0.6.0
