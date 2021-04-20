@@ -26,7 +26,7 @@
   [graph :- GraphType
    entity :- s/Any]
   (->> (node/find-triple graph [entity '?p '?o])
-       (remove #(= :tg/sub (first %)))))
+       (remove #(= :tg/owns (first %)))))
 
 
 (s/defn check-structure :- (s/maybe [KeyValue])

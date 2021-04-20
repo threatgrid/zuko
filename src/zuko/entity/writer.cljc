@@ -9,7 +9,7 @@
 
 ;; internal generated properties:
 ;; :tg/rest List structure
-;; :tg/sub References sub entities
+;; :tg/owns References sub entities
 ;; :tg/entity When true, then indicates a top level entity
 
 ;; The following 2 attributes may vary according to the database.
@@ -84,7 +84,7 @@
   (when-not (or (= node *current-entity*)
                 (@*top-level-entities* node)
                 (= node :tg/empty-list))
-    (vswap! *triples* conj [*current-entity* :tg/sub node]))
+    (vswap! *triples* conj [*current-entity* :tg/owns node]))
   node)
 
 (defn value-triples
@@ -202,7 +202,7 @@
   "Goes back through generated triples and removes sub-entity links to entities that were later
   determined to be top-level entities."
   [top-entities triples]
-  (remove #(and (= :tg/sub (nth % 1)) (top-entities (nth % 2))) triples))
+  (remove #(and (= :tg/owns (nth % 1)) (top-entities (nth % 2))) triples))
 
 (s/defn entities->triples :- [Triple]
   "Converts objects into a sequence of triples."

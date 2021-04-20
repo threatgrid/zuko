@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.6.4] - 2021-04-20
+### Changed
+- Renamed `:tg/sub` to `:tg/owns` before any dependencies lock this name in.
+
+### Added
+- Fixed entity references to top level entities to not own them
+
 ## [0.6.3] - 2021-04-16
 ### Added
 - Entity encoding now includes new attributes that connect sub-entities to top-level entities.
