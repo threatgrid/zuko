@@ -200,21 +200,42 @@
     (is (= d9 dr9))))
 
 (defn generate-diff
-  [o1 o2]
-  (let [triples (entities->triples empty-graph [o1])
-        props (filter (fn [[k v]] (or (number? v) (string? v))) o1)
-        gr (assert-data empty-graph triples)
-        id (ffirst (q (concat '[:find ?id :where] (map (fn [[k v]] ['?id k v]) props)) gr))
-        [additions retractions] (entity-update->triples gr id o2)]
-    [id additions retractions]))
+  "The first object in o1 is the one being updated by o2"
+  ([o1 o2] (generate-diff 0 [o1] o2))
+  ([n o1s o2]
+   (let [triples (entities->triples empty-graph o1s)
+         props (filter (fn [[k v]] (or (number? v) (string? v))) (nth o1s n))
+         gr (assert-data empty-graph triples)
+         id (ffirst (q (concat '[:find ?id :where] (map (fn [[k v]] ['?id k v]) props)) gr))
+         [additions retractions] (entity-update->triples gr id o2)]
+     [id additions retractions triples])))
+
+(deftest test-upd
+  (let [[id5 add5 ret5
+         init-triples5] (generate-diff 2 [{:db/ident :e1 :data "one"} {:db/ident :e2 :data "two"}
+                                        {:a 1 :data-struct {:db/ident :e1}}]
+                                       {:a 1 :data-struct {:db/ident :e2}})]
+    (let [finder (fn [value] (fn [[e a v]] (and (= a :data) (= v value))))
+          id-e1 (ffirst (filter (finder "one") init-triples5))
+          id-e2 (ffirst (filter (finder "two") init-triples5))]
+      (is (= add5 [[id5 :data-struct id-e2]]))
+      (is (= ret5 [[id5 :data-struct id-e1]])))))
 
 (deftest test-updates
-  (let [
-        [id1 add1 ret1] (generate-diff {:a 1} {:a 2})
+  (let [[id1 add1 ret1] (generate-diff {:a 1} {:a 2})
         [id2 add2 ret2] (generate-diff {:a 1 :b "foo"} {:a 2 :b "foo"})
         [id3 add3 ret3] (generate-diff {:a 1 :b "foo"} {:a 1 :b "bar"})
         [id4 add4 ret4] (generate-diff {:a 1 :b "foo" :c [10 11 12] :d {:x "a" :y "b"} :e [{:m 1} {:m 2}]}
-                                       {:b "bar", :c [10 10 12], :e [{:m 1} {:m 2}], :bx "xxx"})]
+                                       {:b "bar", :c [10 10 12], :e [{:m 1} {:m 2}], :bx "xxx"})
+        [id5 add5 ret5
+         init-triples5] (generate-diff 2 [{:db/ident :e1 :data "one"} {:db/ident :e2 :data "two"}
+                                        {:a 1 :data-struct {:db/ident :e1}}]
+                                       {:a 1 :data-struct {:db/ident :e2}})
+        [id6 add6 ret6
+         init-triples6] (generate-diff 0 [{:a 1 :data-struct {:db/ident :e1}}
+                                          {:db/ident :e1 :data "one"} {:db/ident :e2 :data "two"}]
+                                       {:a 1 :data-struct {:db/ident :e2}})
+        finder (fn [value] (fn [[e a v]] (and (= a :data) (= v value))))]
     (is (= add1 [[id1 :a 2]]))
     (is (= ret1 [[id1 :a 1]]))
     (is (= add2 [[id2 :a 2]]))
@@ -227,7 +248,15 @@
       (is (= 3 (count adds)))
       (is (= 4 (count dels)))
       (is (= sid1 sid2))
-      (is (= #{"a" "b"} #{a1 a2})))))
+      (is (= #{"a" "b"} #{a1 a2})))
+    (let [id-e1 (ffirst (filter (finder "one") init-triples5))
+          id-e2 (ffirst (filter (finder "two") init-triples5))]
+      (is (= add5 [[id5 :data-struct id-e2]]))
+      (is (= ret5 [[id5 :data-struct id-e1]])))
+    (let [id-e1 (ffirst (filter (finder "one") init-triples6))
+          id-e2 (ffirst (filter (finder "two") init-triples6))]
+      (is (= add6 [[id6 :data-struct id-e2]]))
+      (is (= ret6 [[id6 :data-struct id-e1]])))))
 
 (defn get-node-ref
   [graph id]
@@ -260,7 +289,7 @@
 (defn ident-map->graph
   ([m] (ident-map->graph m {}))
   ([m mp]
-   (let [[triples result-map] (ident-map->triples empty-graph m mp)]
+   (let [[triples result-map] (ident-map->triples empty-graph m mp #{})]
      [(set triples) result-map])))
 
 (deftest test-ident-map->triples

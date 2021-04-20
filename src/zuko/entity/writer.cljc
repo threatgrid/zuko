@@ -22,13 +22,20 @@
 ;; :tg/emtpty-list A list without entries
 ;; :tg/nil a nil value
 
+
+;; provides dynamic scope of the current contents of the graph
+;; This approach has been adopted to avoid redundantly passing the graph down the callstack
 (def ^:dynamic *current-graph* nil)
 
+;; The following provide dynamic scope of accumulated state through the
+;; conversion of entities into triples. This approach has been adopted for speed.
 (def ^:dynamic *id-map* nil)
 
 (def ^:dynamic *triples* nil)
 
 (def ^:dynamic *current-entity* nil)
+
+(def ^:dynamic *top-level-entities* nil)
 
 (def Triple [(s/one s/Any "Entity")
              (s/one s/Keyword "attribute")
@@ -67,10 +74,16 @@
   (or (and (= :db/id prop) (get @*id-map* id id))
       (ffirst (node/find-triple *current-graph* ['?n prop id]))))
 
+(defn top-level-entity?
+  [node]
+  (seq (node/find-triple *current-graph* [node :tg/entity true])))
+
 (defn add-subentity-relationship
   "Adds a sub-entity relationship for a provided node. Returns the node"
   [node]
-  (when-not (or (= node *current-entity*) (= node :tg/empty-list))
+  (when-not (or (= node *current-entity*)
+                (@*top-level-entities* node)
+                (= node :tg/empty-list))
     (vswap! *triples* conj [*current-entity* :tg/sub node]))
   node)
 
@@ -126,6 +139,8 @@
               (let [lookup (node/find-triple *current-graph* ['?n :db/ident ident])]
                 (if (seq lookup)
                   (let [read-id (ffirst lookup)]
+                    (when (top-level-entity? read-id)
+                      (vswap! *top-level-entities* conj read-id))
                     (vswap! *id-map* assoc ident read-id)
                     [read-id true]) ;; return the retrieved ref
                   [(new-node ident) false]))) ;; nothing retrieved so generate a new ref
@@ -147,6 +162,7 @@
       (doseq [d data]
         (property-vals entity-ref d))
       (binding [*current-entity* entity-ref]
+        (vswap! *top-level-entities* conj entity-ref)
         (doseq [d data]
           (property-vals entity-ref d))))
     entity-ref))
@@ -164,15 +180,17 @@
   "Converts a single map to triples for an ID'ed map"
   ([graph :- GraphType
     j :- EntityMap]
-   (ident-map->triples graph j {}))
+   (ident-map->triples graph j {} #{}))
   ([graph :- GraphType
     j :- EntityMap
-    id-map :- {s/Any s/Any}]
+    id-map :- {s/Any s/Any}
+    top-level-ids :- #{s/Any}]
    (binding [*current-graph* graph
              *id-map* (volatile! id-map)
-             *triples* (volatile! [])]
-     (ident-map->triples j)
-     [@*triples* @*id-map*]))
+             *triples* (volatile! [])
+             *top-level-entities* (volatile! top-level-ids)]
+     (let [derefed-id-map (ident-map->triples j)]
+       [@*triples* derefed-id-map @*top-level-entities*])))
   ([j :- EntityMap]
    (let [node-ref (map->triples j)]
      (if (:db/ident j)
@@ -180,6 +198,11 @@
        (vswap! *triples* into [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]]))
      @*id-map*)))
 
+(defn backtrack-unlink-top-entities
+  "Goes back through generated triples and removes sub-entity links to entities that were later
+  determined to be top-level entities."
+  [top-entities triples]
+  (remove #(and (= :tg/sub (nth % 1)) (top-entities (nth % 2))) triples))
 
 (s/defn entities->triples :- [Triple]
   "Converts objects into a sequence of triples."
@@ -191,10 +214,12 @@
     id-map :- {s/Any s/Any}]
    (binding [*current-graph* graph
              *id-map* (volatile! id-map)
-             *triples* (volatile! [])]
+             *triples* (volatile! [])
+             *top-level-entities* (volatile! #{})]
      (doseq [e entities]
        (ident-map->triples e))
-     @*triples*)))
+     ;; backtrack to see if there were forward references to top level entities
+     (backtrack-unlink-top-entities @*top-level-entities* @*triples*))))
 
 
 ;; updating the store
@@ -203,9 +228,11 @@
   [graph :- GraphType
    node-ref
    [k v]]
-  (if-let [subpv (reader/check-structure graph k v)]
-    (cons [node-ref k v] (mapcat (partial existing-triples graph v) subpv))
-    [[node-ref k v]]))
+  (or
+   (if-let [subpv (reader/check-structure graph k v)]
+     (if-not (some #(= :tg/entity (first %)) subpv) 
+       (cons [node-ref k v] (mapcat (partial existing-triples graph v) subpv))))
+   [[node-ref k v]]))
 
 (s/defn entity-update->triples :- [(s/one [Triple] "assertions") (s/one [Triple] "retractions")]
   "Takes a single structure and converts it into triples to be added and triples to be retracted to create a change"
@@ -215,13 +242,15 @@
   (binding [*current-graph* graph
             *id-map* (volatile! {})]
     (let [pvs (reader/property-values graph node-ref)
-          old-node (reader/pairs->struct graph pvs)
-          to-remove (remove (fn [[k v]] (if-let [newv (get entity k)] (= v newv))) old-node)
+          old-struct (reader/pairs->struct graph pvs)
+          to-remove (remove (fn [[k v]] (if-let [newv (get entity k)] (= v newv))) old-struct)
           pvs-to-remove (filter (comp (set (map first to-remove)) first) pvs)
           triples-to-remove (mapcat (partial existing-triples graph node-ref) pvs-to-remove)
 
-          to-add (remove (fn [[k v]] (when-let [new-val (get old-node k)] (= new-val v))) entity)
-          triples-to-add (binding [*triples* (volatile! [])]
+          to-add (remove (fn [[k v]] (when-let [new-val (get old-struct k)] (= new-val v))) entity)
+          triples-to-add (binding [*triples* (volatile! [])
+                                   *top-level-entities* (volatile! #{})
+                                   *current-entity* node-ref]
                            (doseq [pvs to-add] (property-vals node-ref pvs))
-                           @*triples*)]
+                           (backtrack-unlink-top-entities @*top-level-entities* @*triples*))]
       [triples-to-add triples-to-remove])))
