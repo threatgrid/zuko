@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.6.5] - 2021-05-27
+### Changed
+- Array processing is no longer recursive when converting entities to tuples.
+
 ## [0.6.4] - 2021-04-20
 ### Changed
 - Renamed `:tg/sub` to `:tg/owns` before any dependencies lock this name in.
@@ -135,7 +139,9 @@
 ### Added
 - Extracted from Asami/Naga
 
-[Unreleased]: https://github.com/threatgrid/zuko/compare/0.6.3...HEAD
+[Unreleased]: https://github.com/threatgrid/zuko/compare/0.6.5...HEAD
+[0.6.5]: https://github.com/threatgrid/zuko/compare/0.6.4...0.6.5
+[0.6.4]: https://github.com/threatgrid/zuko/compare/0.6.3...0.6.4
 [0.6.3]: https://github.com/threatgrid/zuko/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/threatgrid/zuko/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/threatgrid/zuko/compare/0.6.0...0.6.1
