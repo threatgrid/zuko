@@ -7,8 +7,6 @@ This is a Clojure/ClojureScript library that works with other Threatgrid data ap
 The initial applications using this library are
 [Naga](https://github.com/threatgrid/naga) and [Asami](https://github.com/threatgrid/asami).
 
-This library provides functionality for:
-- Managing data (especially JSON data) in a graph database. Asami describes this in the [wiki entry for Entity Structures](https://github.com/threatgrid/asami/wiki/Entity-Structure).
 - Projecting data into tuples suitable for query results or insertion into a graph database. Generation of this data with Zuko is discussed in [Asami](https://github.com/threatgrid/asami/wiki/Entity-Structure).
 - Logging in Clojure or ClojureScript
 - General utilities to avoid duplicating code between projects.
