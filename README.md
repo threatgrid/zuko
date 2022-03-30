@@ -1,3 +1,5 @@
+> This repository is no longer being maintained. For ongoing development, please see https://github.com/quoll/zuko.
+
 # Zuko [![Build Status](https://travis-ci.org/threatgrid/zuko.svg?branch=main)](https://travis-ci.org/threatgrid/zuko) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 This is a Clojure/ClojureScript library that works with other Threatgrid data applications.
